@@ -66,6 +66,31 @@ const main_melody = n(
   .room("0.5")
   .roomsize("2").delay("0.1")
 
+const harmony_simple = "1"
+const harmony_simplepattern = n(
+   "< - - - - \
+     [6@2 - [7,4,3] - -]@3 - \
+     - - - - \
+     [<5 4>@2 - [<4 3>,0] -@2]@3 ->*4")
+const harmony_complexpattern = n(
+   "< [8@7 7@2]@2 - [5 -] \
+     [[6,4]@2 - [7,4,3] - 8]@3 [7 -] \
+     [8@7 7@2]@2 [- 5] [10 9] \
+     [<[5,3] [4,1]>@2 - [<4 3>,0] -@2]@3 [8 7]>*4").pan(sine.range(0.2, 0.8))
+const harmony = stack(
+    harmony_simplepattern.gain(harmony_simple),
+    harmony_complexpattern.gain("1".sub(harmony_simple))
+  )
+  .scale('G4:Major')
+  .s('supersaw')
+  .layer(
+    x=>x,
+    x=>x.sound('sine').add(note("-12"))
+  )
+  .lpenv("4")
+  .room("0.5")
+  .roomsize("2").delay("0.1")
+
 const arpeggiator = note(
   "<7 4 4 7 4 4 7 4 4 7 4 4 7 4>*8")
   .scale("G4:Major")
@@ -104,15 +129,17 @@ const bass2 = note(
 
 $: drums1
 ._scope()
-_$: main_melody.lpf(slider(3470,2000,8000))
+_$: main_melody.lpf(slider(5972,2000,8000))
+_$: harmony.delay("0.5") // adjust harmony complexity in harmony_simple Boolean
 $: arpeggiator // add bounce and echo by commenting in the lines below
 // .layer(
 //     x=>x,
 //     x=>x.jux(rev) 
-// ).gain(0.5)
+// ).gain(0.9)
 $: pad
 $: bass
   .legato(slider(1, 0, 1)).gain(slider(0, 0, 1))
   .color("teal")
   ._punchcard()
+
 
