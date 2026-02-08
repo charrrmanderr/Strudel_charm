@@ -12,19 +12,14 @@
 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-samples('github:switchangel/breaks')  //NOTE: breaks are two cycles, so need to divide by 2
-samples('github:switchangel/pad')
-samples('github:tidalcycles/uzu-drumkit')
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // CONTROL PARAMETERs
 setCpm(140/4)
-const lvl = 0.5
+const lvl = "0.3"
 const viz_params = {height:200, width:1400}
 
 // METRONOME
-_$: s("bd:1*4").room("0.5")
-  .gain(lvl)
+// $: s("bd:1*4").bank("RolandTR909").room("0.5")
+//   .gain(lvl)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // FUNCTIONS
@@ -35,16 +30,7 @@ register('acidenv', (x, pat) => pat.lpf(100)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // DRUM PATTERNS
-const break_drums = s("breaks/2")
-  .fit()
-  .scrub( // Scrub let's you mash together subsections of a sound
-    irand(16) // Select random values on the range 1-16
-    .div(16) // Divide by 16 (map values between 0 and 1)
-    .seg(8)) // Segment this to only choose 8 values on that range
-    .rib("<15 20>", 1) // Choose a segment to loop (seed=15 (15th cycle, loop two cycles))
-    .almostNever(ply("2 | 4"))  // Almost never (10% of time) ply (repeat num beats)
-
-const bd1 = s("bd:1*4").room("0.5")
+const bd1 = s("bd:1*4").room("0.5").bank("RolandTR909")
 const hh1 = s("[- hh]*2").room("0.5")
 const cp1 = s("[- cp]*2").room("0.5").gain(0.1)
 const drums1 = stack(
@@ -90,20 +76,127 @@ const bass = n(
   .decay("0.2")
   .ply("1 1 1 2 1 1 2 1")
 
+const tron_bass1 = n(
+  "<{0 0 0 0}%12@3 \
+    {- 1 -5 -3}%4 \
+    {-1 -1 -1 -1}%8@2 - \
+    {~ -3 -5 -1}%4 \
+    {3 3 3 3}%8@2 - \
+    {~ 1 -3 ~}%4 \
+    {0 0 0 0}%12@3 \
+    {- 1 -5 -3}%4 \
+    {2 2 2 2}%8@2 - \
+    {~ -3 -5 -1}%4 \
+    {3 3 3 3}%8@2 - \
+    {~ 1 -3 ~}%4 \
+    >*4"
+  ).scale("B1:minor")
+
+const tron_bass2 = n(
+  "<{2 ~ -3 0}%12@3 \
+    {- 1 -5 -3}%4 \
+    {0 - -5 -3}%8@2 {0 ~ -4 -2}%4 \
+    {~ -3 -5 -1}%4 \
+    {0 ~ -4 -2}%8@2 {0 ~ -3 -1}%4 \
+    {~ 1 -3 ~}%4>*4"
+  ).scale("B1:minor")
+
+const bass3 = n(
+    "<4 -3 [4 4] -3>*4"
+  ).scale("B2:Minor")
+  .sound("supersaw")
+  .legato(0.65)
+
+const trebble = n(
+    "<- [[- [3,2(2,8,0)]],1(3,8,3)] - ->/2"
+  )
+  .scale("B4:minor")
+  .s('square')
+  .delay("1")
+  .ply(2)
+  .partials(["1", "1", "0|1?0.1", "0|1?0.1", "[0 0.3 1]", "0|1?0.1", "[0 1]", "1 0.3 0"])
+  .phases(randL(2))
+  .pan(sine)
+
+const arpwave_b_main = n(
+  "<{0 0 0 0}%12@3 \
+    {- 1 -5 -3}%4 \
+    {-1 -1 -1 -1}%8@2 - \
+    {~ -3 -5 -1}%4 \
+    {3 3 3 3}%8@2 - \
+    {~ 1 -3 ~}%4 \
+    {4 4 4 4}%12@3 \
+    {- 1 -5 -3}%4 \
+    {2 2 2 2}%8@2 - \
+    {~ -3 -5 -1}%4 \
+    {3 3 3 3}%8@2 - \
+    {~ 1 -3 ~}%4 \
+    >*4"
+  )
+
+const arpwave_b_harm = n(
+  "<{-3 -3 -3 -3}%12@3 \
+    {- 1 -5 -3}%4 \
+    {1 1 1 1}%8@2 - \
+    {~ -3 -5 -1}%4 \
+    [4!4 3!4 2!4 1!4]@4 \
+    {0 0 0 0}%12@3 \
+    {- 1 -5 -3}%4 \
+    {-1 -1 -1 -1}%8@2 - \
+    {~ -3 -5 -1}%4 \
+    {0 0 0 0}%8@2 - \
+    {~ 1 -3 ~}%4 \
+    >*4"
+  )
+
+const arpwave_b = stack(
+    arpwave_b_main.pan(0.2),
+    arpwave_b_harm.pan(0.8)
+  )
+  .scale("B2:minor")
+  .sound("square")
+  .decay("0.5")
+  .fmi(sine.range(0,4))
+  .acidenv(0.5)
+  .gain(lvl)
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-$: drums1
-.gain(lvl)
-// ._scope()
 
-$: stack(
-  arpwave.acidenv(slider(1, 0, 1)),
-  arpwave_gallop.acidenv(slider(0, 0, 1))
-)
+_$: drums1
+.gain(lvl)
+
+_$: trebble.gain(lvl)
+
+// MODE 1
+_$: bass.gain("1.5".mul(lvl))
+
+const drop = "0"
+$: arpwave.acidenv(0.3)
 .delay(0.2)
-.gain(lvl)
-// ._punchcard(viz_params)
+  .gain(lvl)
+// .gain(drop.mul(lvl))
+._punchcard(viz_params)
 
-$: bass
-.gain(lvl)
-// ._spiral()
+_$: arpwave_b
+  .fmh("<0 1 2 3 4>*8") // increase fmh for a higher EQ
+  .acidenv(0.4)//("<0.4 0.6 0.8 1 1.2 1.4 1.6 1.4 1.2 1 0.8 0.6>")
+  .delay("0.3")
+  .jux(rev)
+
+
+_$: tron_bass2
+  .s("saw")
+  // .penv(10).panchor(0).pdec(0.05)
+  .delay(0.2).room(0.25)
+  .compressor(-20).vib(0.3)
+  .partials(randL(200))
+  .phases(randL(200))
+  .acidenv(1)
+  .gain(lvl)
+  // .gain(drop.mul(lvl))
+
+_$: bass3
+  .fast("<1 <1 2>>*2")
+  // .fast(2)
+
