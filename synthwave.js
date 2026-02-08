@@ -173,7 +173,7 @@ _$: bass.gain("1.5".mul(lvl))
 
 const drop = "0"
 $: arpwave.acidenv(0.3)
-.delay(0.2)
+.delay(0.2) / 1.5
   .gain(lvl)
 // .gain(drop.mul(lvl))
 ._punchcard(viz_params)
