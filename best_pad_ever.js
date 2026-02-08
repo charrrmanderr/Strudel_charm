@@ -32,6 +32,11 @@ register('acidenv', (x, pat) => pat.lpf(100)
         .lpenv(x * 9).lps(.2).lpd(.12)
 )
 
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// DRUMS
 const break_beat = s("breaks/4")
   .fit()
   .scrub( // Scrub let's you mash together subsections of a sound
@@ -41,7 +46,21 @@ const break_beat = s("breaks/4")
     .rib("<5 4 2 [3 7]>/2", 1) // Choose a segment to loop (seed=15 (15th cycle, loop two cycles))
     .almostNever(ply("2"))
 
+
+// LINES
 const chord_line = note("<e4 b4 g#4 d4 e4 e4 g4 b4>").sound("triangle")
+const my_weird_shit = note(
+    "<45 47 48 50>/2"
+  ).layer(
+  x=>x.sound("square").gain(1),
+  x=>x.add(note(7)).sound("square").gain(0.8),
+  x=>x.add(note(14)).sound("square").gain(0.6),
+  x=>x.add(note(21)).sound("square").gain(0.4)
+  )
+  .fmi(0.15).fmh(1).partials([1,1,1,1,1,1,1,1])
+
+
+// MELODIES
 const plinky_melody = note(
     "<- - [-@2 e4@3 b4@3]@2 <e4 f#4 g#4> - [-@2 d4@4 e4@2]@2 \
     [e4 -] - [-@2 e4@3 b4@3]@2 e4 - [d4 b3] [d4 e4]>*2")
@@ -73,50 +92,52 @@ const melody = stack(
   .partials(new Array(18).fill(1))
   .lpf(1000)
 
-const my_weird_shit = note(
-    "<45 47 48 50>/2"
-  ).layer(
-  x=>x.sound("square").gain(1),
-  x=>x.add(note(7)).sound("square").gain(0.8),
-  x=>x.add(note(14)).sound("square").gain(0.6),
-  x=>x.add(note(21)).sound("square").gain(0.4)
-  )
-  .fmi(0.15).fmh(1).partials([1,1,1,1,1,1,1,1])
 
-$: chord_line.gain("0.8".mul(lvl))
-
-$: note("<- - - - [<f#4 ->,<g#4 g4>,b4] - - ->*2")
-  .sound('gm_music_box').add(note(12))
-  .release("1.5")
-  .attack("0.1")
-  .decay("4")
-  .sustain("4")
-  .gain(lvl)
-
-$: note("<e2!4 b2!4 g2!4 f#2!4>*2")
+// BASS
+const bass = note("<e2!2 b2!2 g2!2 f#2!2>")
   .sound("gm_cello")
   .layer(
     x=>x,
     x=>x.add(note(-12))
   )
-  .attack("0")
-  .ply("<1 [1|2] 1 [6|1]>*2")
+  .attack("0.15")
+  .ply("<1 [1|2] 1 [1|2|6]>")
   .penv(8).panchor(0).pdec(0.05)
   .room(0.25)
   .partials(randL(200))
   .phases(randL(200))
-  .gain("1.5".mul(lvl))
-  ._punchcard()
 
-_$: plinky_melody
+
+// TREBBLE
+const twinkle_chord = note("<- - - - [<f#4 ->,<g#4 g4>,b4] - - ->*2")
+  .sound('gm_music_box').add(note(12))
+  .release("1.5")
+  .attack("0.1")
+  .decay("4")
+  .sustain("4")
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// DJ STATION
+
+_$: chord_line.gain("1".mul(lvl))
+
+_$: twinkle_chord
+  .gain(lvl)
+
+_$: bass
+  .gain("1.5".mul(lvl))
+  .scope(viz_params)
+
+$: plinky_melody
   .gain("1.6".mul(lvl))
 
-$: melody
+_$: melody
   .gain("1.6".mul(lvl))
   // .gain(lvl)
 
 $: my_weird_shit.gain("0.5".mul(lvl))
 
-$: break_beat
+_$: break_beat
     .gain("0.85".mul(lvl))
-    ._scope()
+    ._scope(viz_params)
