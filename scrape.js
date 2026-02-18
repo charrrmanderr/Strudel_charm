@@ -15,7 +15,7 @@
 // CONTROL PARAMETERs
 setCpm(110/4)
 const lvl = "0.3"
-const viz_params = {height:200, width:1400}
+const viz_params = {height:100, width:1400}
 
 // METRONOME
 // $: s("bd:1*4").bank("RolandTR909").room("0.5")
@@ -83,7 +83,7 @@ const bass2 =
   .scale("F1:Phrygian")
   .legato("1 0 0 0.3")
   .bass_effects(bass_pulse)
-  .sound("saw")
+  .sound("square")
   .saw_partials("<3 4 5 6 8 10 12 [15 16] 17 19 [20 22] [23 24]>")
 
 const fall = 
@@ -92,7 +92,6 @@ const fall =
     7 10 6 7 - 6 - 7>*16")
   .scale("f4:Phrygian")
   .sound("gm_pad_halo")
-  // .sound('piano').add(note(12))
   .sustain("0.2")
   .decay("0.3")
   .room("0.7")
@@ -101,7 +100,8 @@ const fall =
 const rise = 
   n("<3 4 5 6 7 10 11 12 13 14 15 17>")
   .scale("F2:Phrygian")
-  .s("tri")
+  .s("square")
+  .fmi("0.7")
   .attack("0.2")
   .sustain("1")
   .decay("0.3")
@@ -111,34 +111,45 @@ const rise =
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-_$: bd1
-_$: simple_stack
-_$: sh1.gain("2".mul(lvl))
+_$: s("bd:1").hpf(100).bank("RolandTR808").gain("2".mul(lvl))
+_$: bd1.gain(lvl)
+$: simple_stack
+$: sh1.gain("2".mul(lvl))
 _$: drums1
 .gain(lvl)
-
+.color("white")
+._scope(viz_params)
+  
 _$: melody
   .lpf(slider(200,200,3000))
   .crush(16)
   // .off(1/4, x=>x.noise(3).phaser(8).gain(0.3))
   .gain("3".mul(lvl))
+  // .legato("2").delay("2").gain(rand.range(lvl, "2".mul(lvl)))
+  .acidenv("10")
+  .color("white")
+  ._punchcard(viz_params)
 
-_$: bass1.gain(lvl)
-.room("1 0")
-
-_$: stack(
-    bass1.gain("1".mul(lvl)),
-    bass2.gain("0".mul(lvl)).acidenv(10)
+$: stack(
+    bass1.gain("0.2".mul(lvl)),
+    bass2.gain("1".mul(lvl)).acidenv(10)
   )
-  .room("1 0")
+  .room("0.3 0")
+  .spectrum()
 
 $: fall
   // .off(1/32, x=>x.add(note(12)).delay("0.5"))
   // .off(1/16, x=>x.add(note(24)).vib(1).delay("0.8"))
-  // .off(1/8, x=>x.add(note(36)).vib(3).delay("1"))
+  // // .off(1/8, x=>x.add(note(36)).vib(3).delay("1"))
   // .off(1/32, x=>x.add(note(14)).vib(0.5).gain(0.3).delay("0.6"))
   .gain("1.2".mul(lvl))
+  ._punchcard(viz_params)
 
 _$: rise
-  // .off(0, x=>x.add(note("<3 3 4 3 3 3 1 1 1 1 1 -5>")).press())
+  // // .off(0, x=>x.add(note("<3 3 4 3 3 3 1 1 1 1 1 -7>")).press())
+  .off(0, x=>x.add(note("<1!11 0>")).press())
+  .room("1")
+  .gain("0.5".mul(lvl))
+  .color("white")
+  ._scope(viz_params)
 
