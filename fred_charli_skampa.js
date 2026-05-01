@@ -16,7 +16,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // CONTROL PARAMETERs
 setCpm(136/4)
-const lvl = "1.5"
+const lvl = "0.5"
 const viz_params = {height:200, width:1400}
 
 // METRONOME
@@ -102,26 +102,31 @@ DRUMS: arrange(
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // BASS
 
-const bassline = n("<0 [- 0] 1 0 [- 0] 1 5 1>*4")
+const bassline = n("<0 [- 0] 1 0 [- 0] 1 5 1>*4") // n("<[0@3 0]@2 1 [0@3 0]@2 1 5 1>*4")
+const counterbass = n("<4 [- 4] 5 4 [- 4] 5 7 [5 [4 5]]>*4")
 
 
-_BASS2: bassline.s("saw")
+BASS2: "<0@8 1@8>".pick([bassline, counterbass])
+  .s("saw")
   .scale("[Eb3, Eb2]:Phrygian")
   .adsr("0.1:0.5:1:0.4")
   .legato(0.4)
   .room("1")
-  .lpf(slider(12.7,10,40).pow(2))
+  .lpf(slider(10,10,40).pow(2))
+  .gain(0.5)
 
 BASS: bassline
   .scale("Eb2:Phrygian")
   .layer(
     x=>x.s("sine"),//.distort(1).lpf(200),
     // x=>x.s("sine").add(note(12)).gain(0.5),
-    x=>x.s("sine").add(note(24)).gain(0.15),
+    // x=>x.s("sine").add(note(24)).gain(0.15),
     // x=>x.s("sine").add(note(0.05)),
     x=>x.s("sine").add(note(-12)),
     x=>x.s("sine").add(note(-12.1))
   )
+  // .adsr("0:0.2:0.5:0")
+  // .legato("0.95")
   .fm("4")
   .fm(4)
   .fmdecay(.5)
@@ -140,16 +145,101 @@ BASS: bassline
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // VOCALS
 const tune_charli = "39"
-CHARLI: s("vox").slice(32 * 4, "<77 78 79 - 80 81 82 83>*4")
+
+const charli_arr = [
+  s("vox").slice(32 * 4, "<77 78 79 - 80 81 82 83>*4")
+  .legato(1.5),
+
+  s("vox").slice(32 * 4, "<77 78 79 - 80 81 82 83>*4")
+    .legato(1.5)
+    .delay("<1 0 0 0>*2"),
+  
+  s("vox").slice(32 * 4, "<77 78 79 - 80 81 82 83>*4")
+  .legato(1.5)
+  .fast(2).ply("<1@3 2>"),
+
+  s("vox").slice(32 * 4, "<77 78 79 - 80 81 82 83>*4")
+    .legato(1.5)
+    .layer(
+      x=>x.gain(0.3).legato(0.8),
+      x=>x.add(note(-12))
+    ),
+
+  s("vox").slice(32 * 4, "<77 78 79 - 80 81 82 83>*4")
+    .legato(1.5)
+    .bpf("<500 1000 1500 2000>").jux(rev),
+
+  s("vox").slice(32 * 4, "<77 78 79 - 80 81 82 83>*4")
+    .legato(1.5)
+    .crush(6),
+
+  s("vox").slice(32 * 4, "<77 78 79 - 80 81 82 83>*4")
+    .legato(1.5)
+    .distort(1).gain(0.4),
+]
+
+_CHARLI: "<0@2 1 2@2 3@2 4 5 6>/4".pick(charli_arr).add(note(tune_charli))
+  .postgain(lvl)
+// 0: Yeah, 360 (when you're in the mirror do you like what you see?)
+// 1: Add echo
+// 2: Fast & ply
+// 3: Slow, octave down
+// 4: Bandpass filter w/ jux
+// 5: bitcrush
+// 6: distort
+
+
+_CH: s("vox").slice(32 * 4, "<77 78 79 - 80 81 82 83>*4")
   .add(note(tune_charli))
   .legato(1.5)
   // .layer(
-  //   x=>x.gain(0.5).legato(0.8),
+  //   x=>x.gain(0.3).legato(0.8),
   //   x=>x.add(note(-12))
   // )
   // .fast(2).ply("<1@3 2>")
+  // .delay("<1 0 0 0>*2")
+  // .bpf("<500 1000 1500 2000>").jux(rev)
+  // .crush(6)
+  // .distort(1)
+  .gain(0.5)
+
+_v360: s("vox").slice(32 * 4, "79").struct("<x - [- x] [- x]>*4")
+  .add(note(tune_charli))
+  .legato(1.5)
+  .gain(0.5)
+  // .lpf(800)
+  
+_JUSTLOOKING: s("vox").slice(32 * 4, "<[- 86.5] 87 88 ->*4")
+  .add(note(tune_charli))
+  .legato(0.93)
+  .phaser(2)
+  .vib("0|40|80|120|200").vibmod("2")
+  .postgain(lvl)
+
+const bumpin_that = s("vox").slice(32 * 4, "<- 115 116 117 118 119 120 121>*4").legato("1.5")
+const bumpin_that_fast = s("vox").slice(32 * 4, "<115 116 117 119 120 121 [115 115] 119>*4").fast(2).legato("1.5").delay("0.1")
+_BUMPIN_THAT: "<0 1>/4".pick([bumpin_that, bumpin_that_fast])
+  .add(note(tune_charli))
+  .gain(0.5)
 
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// ARP
+const simple_arp = n("<0 0 0 0 0 0 1 0 5 0 0 0 1 0 0 0>*16")
+const compl_arp = n("<<-1 -3> 0 0 0 0 -1 1 0 5 0 0 -1 1 0 0 0>*16")
+const pedal_arp1 = n("<4 5 6 7>/2").seg(16)
+const pedal_arp2 = n("<4 [5 [6@2 7]]>/2").seg(16)
+$: stack(
+  simple_arp,
+  // compl_arp,
+  // "<0 1>/4".pick([pedal_arp1, pedal_arp2])
+  )
+  .scale("Eb4:Phrygian")
+  .legato(0.6)
+  .gain(1)
+  .lpf(slider(10,10,100).pow(2))
+  // .lpf(perlin.range(500,10000).fast(16))
+  .s("tri")
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -173,3 +263,4 @@ solid(0.1, 0.1, 0.8)
 
 
 
+all(x=>x.postgain(lvl))
