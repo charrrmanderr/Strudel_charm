@@ -33,14 +33,28 @@ const stack1 = stack(
 
 const stack2 = stack(
   s("<[bd:1*6 [- bd:1]] [- bd:1] [- bd:0*2] ->*4").bank("RolandTR909").room("0.5"),
-  s("<- cp - <cp [cp - - cp]>>*4").room("0.3").delay("<0 1>"),
+  s("<- cp - <cp [cp - - cp]>>*4").room("0.3").delay("<0 0 0 0 1 1 1 [1 0]>*2"),
   s("sh").seg(16).legato(2).room("0.4").phaser(0.5)
   )
 
+const stack3 = stack(
+  s("bd:1 - - -").bank("RolandTR909").room("1"),
+  s("<- bd - - bd bd - - <- bd> bd - - bd bd - ->*16").bank("RolandTR707").distort(1),
+  s("<- <cp cp cp [cp cp]>>*8").lpf(40000),
+  s("<[- - hh - hh hh hh hh] [hh hh hh hh] [- hh hh hh] [- hh hh hh]>*4").bank("<RolandTR606 RolandTR808>"),
+  s("rim").struct("<- - - [x x] - - - - - - - [x <- x>] - <x -> - <<[x x] -> -> - - - - - - - - - - - - - - - ->*16")
+    .lpf(4000)
+)
+
 const drum_arr = arrange(
-  [8, stack1],
-  [8, stack2]
+  [64, arrange(
+        [8, stack1],
+        [8, stack2])],
+  // [32, arrange(
+  //       [8, stack2],
+  //       [8, stack3])]
 ).label("<i l o v e m u s i c>*8")
+
 
 DRUM: drum_arr.pan(0.55)._punchcard({ ...viz_params, labels: 1 })
 
@@ -124,11 +138,13 @@ const dark_bass2 = n("<\
   .scale("[E2,E1]:<Minor@3 phrygian>*2")
   .s("supersaw")
   .delay(0.4)
-  .legato(0.4)
+  .legato(0.8)
+  .velocity("<1 0.8>*16").pan("<0.5 <0.3 0.7>*16>")
   .room("0.7")
   .lpf(10000)
-  .lpq(3)
-  .gain(3)
+  // .lpq(3)
+  .gain(2.5)
+
 
 _BASS: "<0 1 0 0 0 1 [1 0] 1>/8".pick([dark_bass, dark_bass2])
 BASS: arrange(
@@ -144,7 +160,7 @@ const twinkle_chord_arp = n("<[0 2 4 7 9 11 14 18] - - - [16 14 11 9 6 4 2 1] - 
   .s("sine")
   .vib("2:0.3")
   .gain(0.25)
-TWIN: arrange(
+_TWIN: arrange(
   [2, "-"],
   [6, twinkle_chord_arp.sometimesBy(0.85, ply(0))],
   [6, twinkle_chord_arp],
@@ -181,10 +197,11 @@ const punch_chords_var2 =
   .gain(1.1)
 
 _PUNCH: punch_chords_var._punchcard(viz_params)
-PUNCH_ARR: arrange(
+_PUNCH_ARR: arrange(
   [8, "-"],
   [4, punch_chords],
   [4, punch_chords_var],
+  [8, "-"],
   [8, punch_chords_var1],
   [8, punch_chords_var2],
 ).pan(0.4)._punchcard(viz_params)
@@ -199,7 +216,8 @@ const velocity = "<\
      [0 1 1 0]@4 - - [0 1 1 0]@4 - - [0 1 1 0]@4 [0 1 1 0]@4 - - [0 1 1 0]@4 - - [0 1 1 0]@4\
      [0 1 1 0]@4 - - [0 1 1 0]@4 - - [0 1 1 0]@4 [0 1 1 0]@4 - - [0 1 1 0]@4 - - [0 1 1 0]@4>*16".pick([1, 0.7])
 
-_POWER_STACK: stack(upper, lower)
+
+const power_stack = stack(upper, lower)
   .scale("E3:Minor")
   .s("saw")
   .release(0.4)
@@ -207,6 +225,10 @@ _POWER_STACK: stack(upper, lower)
   .velocity(velocity)
   .gain(1.1)
   .room("1")
+_POWER_STACK: arrange(
+  [16, "-"],
+  [32, power_stack]
+)
   ._pianoroll(viz_params)
 
 const ctrl_ptrn = "<2 1 1 2 1 1 2 1 1 2 1 1 3 1 1 ->*16"
@@ -240,10 +262,10 @@ _TEX_MAIN: arrange(
 
 
 
-_BUBBLE: n("<3 - 2 4 - 2 - <- 3> - <- 2> - <- 4> - <- 2> - ->*16").scale("E5:Minor")
+const bubble = n("<3 - 2 4 - 2 - <- 3> - <- 2> - <- 4> - <- 2> - ->*16").scale("E5:Minor")
   .s("tri")
   .layer(x=>x//,
-         // x=>x.off(1/32, add(note(12)))
+         // x=>x.off(1/2, add(note(-12)))
         )
   .crush(5)
   .room("0.5")
@@ -253,14 +275,111 @@ _BUBBLE: n("<3 - 2 4 - 2 - <- 3> - <- 2> - <- 4> - <- 2> - ->*16").scale("E5:Min
   .lpq(2)
   .release(0.5)
   .delay("0.25")
-  .gain(2)
-  ._punchcard(viz_params)
+_BUBBLE: bubble._punchcard(viz_params)
+
+
+const voice1 = n("<4 - - 6 3 - [- - [9] [8]] [- [6] - -]>*4")
+const voice2 = n("<2 - - 3 1 - [- - [9] [8]] [- [6] - -]>*4")
+const voice3 = n("<4 - - 6 3 - [- - 11 10] [- [8,9] - -]>*4")
+const voices = stack(
+    voice1,
+    voice2,
+    voice3
+  )
+  .scale("E5:Minor")
+  // .gain(0.8)
+  // .s("tri")
+  .s("gm_epiano1:2")
+  .delay(0.8)
+  .room("2")
+_VOICES: voices._punchcard(viz_params)
+
+const ctvox1 = n("<0 - - 1 2 - [- - - -] [4 -]>*4")
+const ctvox2 = n("<4 - - 6 3 - [- - - -] [6 -]>*4").velocity(0.3)
+const contravox = stack(
+    ctvox1,
+    ctvox2
+  )
+  .gain(0.5)
+  .scale("E3,E4:Minor")
+  // .s("gm_epiano1:10")
+  .s("supersaw")
+  .lpf(20000)
+  .release(0.4)
+  .room("1")
+  // .gain(0.85)
+_CONTRAVOX: contravox._punchcard(viz_params)
+ALLVOX: arrange(
+  [4, "-"],
+  [4, voices],
+  [8, stack(voices, contravox)],
+  [4, "-"],
+  [4, voices],
+  [8, stack(voices, contravox)],
+  [8, "-"]
+)._punchcard(viz_params)
+
+
+const bg_twin = n("<- - - - - - [- - 11 10] [9 8 7 -]>*4")
+  .scale("E5:Minor")
+  .s("gm_epiano1:8")
+  .delay(2)
+  .room("2")
+  .gain(0.5)
+BG_TWIN: bg_twin._pitchwheel()
+
+const doot = n("<3 - <- -1> 4 3 - - <- -1 [- 2]>>*4")
+  .scale("E5:Minor")
+  .gain(1.5)
+  .ply("2")
+  .off(1/16, x=>x.add(note(12)).lpf(1000).gain(0.5))
+  .s("piano")
+  .delay("1")
+  .room("1")
+_DOOT: "<0 1 0>/8".pick(["-", doot])._punchcard(viz_params)
+  
+
+const chvx = n("<[0,2,3]@2 - [1,4,6] [-1,1,2]@2 - [0,2,4]>*4")
+  .scale("E4:Minor")
+  .s("gm_pad_warm:<0 1>/4")
+  .release(0.5)
+  .phaser("<2 3 1>*2")
+  .gain("2")
+const chopchvx1 = n("<[0,2,3]@(3,8,0) - [1,4,6] [-1,1,2]@(3,8,0) - [0,2,4]>*4")
+  .scale("E4:Minor")
+  .s("supersaw")
+  .legato(0.5)
+  .off(1/16, x=>x)
+  .phaser("<2 3 1>*2")
+  .gain("2")
+const chopchvx2 = n("<- - - [3 2 3 4] [3 - - 3] - - ->*4").velocity(1.5)
+  .scale("E4:Minor")
+  .s("supersaw")
+  .legato(0.5)
+  .off(1/16, x=>x)
+  .phaser("<2 3 1>*2")
+  .gain("2")
+
+CHVX: arrange(
+  [8, chvx._scope(viz_params)],
+  [4, stack(
+    chvx._scope(viz_params), 
+    chopchvx1._scope(viz_params))],
+  [4, stack(
+    chvx._scope(viz_params), 
+    chopchvx1._scope(viz_params), 
+    chopchvx2._scope(viz_params))],
+  [8, "-"]
+)
+
+
+
 
 all(x=>x.postgain(lvl).theme("archBtw"))
 
 
 await initHydra({ detectMove: true })
-let rainShift = 0;
+let rainShift = -10000;
 
 shape(16, 0.08, 0.0)
   .color(1, 1, 1)
@@ -272,11 +391,12 @@ shape(16, 0.08, 0.0)
   .modulate(noise(20, 1), 0.005) 
   
   .scrollX(() => {
-    rainShift += mouse.x * -0.000002; 
+    rainShift += mouse.x * -0.000002 + mouse.y * 0.000005; 
     return rainShift;
   })  
   
   .scrollY(() => time * -0.6)
   .blend(o0, 0.8)              
   .out(o0)
+
 
