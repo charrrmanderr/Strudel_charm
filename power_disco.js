@@ -80,33 +80,6 @@ PAD: bottle_chords._spectrum(viz_params)
 DRONE: bagpipe_drone.pan(0.6)._scope(viz_params)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// TREBBLE ELEMENTS
-const bagpipe_melody = note("<9@3 [8 7] 6@3 [7 8] 7@4 4@3 [7 4] \
-                              6@3 [5 4] 3@3 [4 5] 4@4 1@3 [7 8]>*8")
-  .scale("E3:Minor")
-  .s("gm_bagpipe")
-  .gain(0.6)
-_BPMELODY: bagpipe_melody
-
-const fiddle1 = n("<7 0 0 7 6 4  7          0     0 7 4 6 7 - 7 <- [4 6]>>*16").scale("E4:Minor").s("gm_fiddle")
-const fiddle2 = n("<9 2 2 9 8 6 <8 9 10 7> <0 10> 4 9 6 8 6 - 5 <- [5 4]>>*16").scale("E4:Minor").s("gm_fiddle").gain(0.6)
-_FIDDLE: stack(
-  fiddle1,
-  fiddle2
-  )
-
-
-_TREBBLE_STACK: arrange(
-  [8, "-"],
-  [4, bagpipe_melody],
-  [4, stack(bagpipe_melody, fiddle1)],
-  [8, bagpipe_melody],
-  [8, stack(fiddle1, fiddle2)],
-  [32, "-"]
-)
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // BASSLINES
 const acoustic_bass = n("<<0 1> - - <-3!3 4>>*4")
   .scale("E3:Minor")
@@ -122,7 +95,7 @@ const synth_bass = n("<0!16 1!7 -1!4 -2!4 -3>*16")
 
 const dark_bass = n("<\
         0 - 0 0 4 0 0 0 - 1 - 1  -  2  0  0 \
-        2 2 2 2 2 1 1 1 1 1 1 1 0 0 -2 -3>*16")
+        2 2 2 2 1 1 1 1 1 1 1 1 0 0 -2 -3>*16")
   .scale("[E3,E2,E1]:<Minor@3 phrygian>*2")
   .s("supersaw")
   .delay(0.4)
@@ -160,7 +133,7 @@ const twinkle_chord_arp = n("<[0 2 4 7 9 11 14 18] - - - [16 14 11 9 6 4 2 1] - 
   .s("sine")
   .vib("2:0.3")
   .gain(0.25)
-_TWIN: arrange(
+TWIN: arrange(
   [2, "-"],
   [6, twinkle_chord_arp.sometimesBy(0.85, ply(0))],
   [6, twinkle_chord_arp],
@@ -172,6 +145,7 @@ const punch_chords = n("<[0,2,4,7] - - - - - [0,2,4,7] - - - - - [0,2,4,7] - - -
   .scale("E3:Minor")
   .s("supersaw")
   .release(0.5)
+
 
 const punch_chords_var = punch_chords
   .release(0.4)
@@ -197,13 +171,22 @@ const punch_chords_var2 =
   .gain(1.1)
 
 _PUNCH: punch_chords_var._punchcard(viz_params)
-_PUNCH_ARR: arrange(
+PUNCH_ARR: arrange(
   [8, "-"],
-  [4, punch_chords],
+  [4, punch_chords], 
   [4, punch_chords_var],
   [8, "-"],
   [8, punch_chords_var1],
   [8, punch_chords_var2],
+  [8, "-"],
+  [4, punch_chords_var],
+  [4, punch_chords],
+  [8, punch_chords_var1],
+  [8, "-"],
+  [4, punch_chords], 
+  [4, punch_chords_var],
+  [8, "-"],
+  [8, punch_chords_var1]
 ).pan(0.4)._punchcard(viz_params)
 
 const upper = n("<\
@@ -225,10 +208,18 @@ const power_stack = stack(upper, lower)
   .velocity(velocity)
   .gain(1.1)
   .room("1")
-_POWER_STACK: arrange(
+  //.lpf(slider(1,1,100).pow(2))
+POWER_STACK: arrange(
   [16, "-"],
-  [32, power_stack]
+  [32, power_stack],
+  [8, "-"],
+  [8, power_stack],
+  [8, "-"],
+  [8, power_stack],
+  [8, "-"],
+  [8, power_stack],
 )
+  // .transpose("0,12")
   ._pianoroll(viz_params)
 
 const ctrl_ptrn = "<2 1 1 2 1 1 2 1 1 2 1 1 3 1 1 ->*16"
@@ -245,20 +236,7 @@ _MINI: mini_alt._punchcard(viz_params)
 
 
 
-_TEX_MAIN: arrange(
-  [8, twinkle_chord_arp],
-  [4, punch_chords],
-  [4, punch_chords.release(0.4).legato(0.2).off(1/16, x=>x).off(1/8, x=>x)],
-  [8, twinkle_chord_arp],
-  [2, punch_chords],
-  [6, stack(punch_chords, mini_alt)],
-  [8, "-"],
-  [4, punch_chords],
-  [4, punch_chords.release(0.4).legato(0.2).off(1/16, x=>x).off(1/8, x=>x)],
-  [8, twinkle_chord_arp],
-  [2, punch_chords],
-  [6, stack(punch_chords, mini_alt)]
-)._pianoroll(viz_params)
+
 
 
 
@@ -309,7 +287,7 @@ const contravox = stack(
   .room("1")
   // .gain(0.85)
 _CONTRAVOX: contravox._punchcard(viz_params)
-ALLVOX: arrange(
+_ALLVOX: arrange(
   [4, "-"],
   [4, voices],
   [8, stack(voices, contravox)],
@@ -326,7 +304,17 @@ const bg_twin = n("<- - - - - - [- - 11 10] [9 8 7 -]>*4")
   .delay(2)
   .room("2")
   .gain(0.5)
-BG_TWIN: bg_twin._pitchwheel()
+_BG_TWIN: bg_twin._pitchwheel()
+
+
+_$: n("<[0,-5]!2 -!2 [1,-5] - [2,-2] [1,-3]>*4")
+  .ply("4")
+  .scale("E3,E4:<Minor Phrygian>*2")
+  .s("supersaw")
+  .delay("0.35")
+  .legato(0.4)
+  .gain(2)
+  
 
 const doot = n("<3 - <- -1> 4 3 - - <- -1 [- 2]>>*4")
   .scale("E5:Minor")
@@ -360,7 +348,7 @@ const chopchvx2 = n("<- - - [3 2 3 4] [3 - - 3] - - ->*4").velocity(1.5)
   .phaser("<2 3 1>*2")
   .gain("2")
 
-CHVX: arrange(
+_CHVX: arrange(
   [8, chvx._scope(viz_params)],
   [4, stack(
     chvx._scope(viz_params), 
@@ -374,8 +362,15 @@ CHVX: arrange(
 
 
 
+// const font_family_pattern = arrange(
+//   [64, "monospace"],
+//   [8, "galactico"],
+//   [8, "monospace"],
+//   [8, "galactico"],
+//   [8, "monospace"]
+// )
 
-all(x=>x.postgain(lvl).theme("archBtw"))
+all(x=>x.postgain(lvl).fontFamily("x3270").theme("greenText"))
 
 
 await initHydra({ detectMove: true })
