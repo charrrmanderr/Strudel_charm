@@ -17,7 +17,7 @@ const cpm = 120/4
 setCpm(cpm)
 const key = "G:major"
 const lvl = "0.5"
-const viz_params = {height:100, width:2000}
+const viz_params = {height:100, width:1500}
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // IMPORTS
 samples({
@@ -118,7 +118,7 @@ const bass_patt2 = n("<0 - - - [- 0] [0 -] [- 0] - 0 - - - - [0 -] [- 0] ->*8")
   .gain(3)
   .lpf(slider(100,10,100).pow(2))
 
-_BASS: "<0 1>/2".pick([bass_patt1, bass_patt2])
+_BASS: "<0 1>/8".pick([bass_patt1, bass_patt2])
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // INTRO DECK
@@ -126,11 +126,10 @@ const intro_chords = A
   .struct("<x -> <- x> x - x [- x] [- x] x")
   .scale(key)
   .s("gm_electric_guitar_muted")
-  .room("1")
   .delay("0.5")
   .layer(
-    x=>x.attack("0.08").release("0.5"), 
-    x=>x.attack("0.20").release("1.0").add(note(12)).gain(0.3).vib("4:0.3")
+    x=>x.attack("0.08").release("0.5").room("1").gain(0.7), 
+    x=>x.attack("0.20").release("1.0").add(note(12)).gain(0.3).vib("4:0.3").room("2").delay("1.5")
     )
   .lpf(slider(100,10,100).pow(2))
 
@@ -145,9 +144,24 @@ const main_chords = A
 const intro = arrange(
   [7, intro_chords],
   [1, fill],
-  [8, stack(stack1, bass_patt1)]
+  [8, stack(main_chords, stack1, bass_patt1)]
 )
 $: intro // AS SOON AS INTRO IS DONE, NEED TO SWITCH TO MAIN (ENGAGE ^DRUMS^, ^CHORDS^, ^BASS^ INDEPENDENTLY)
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// PAD
+
+_$: A.struct("<x>")
+  .scale(key)
+  .s("gm_electric_guitar_muted")
+  .delay("0.5")
+  .attack("0.20").release("1.0")
+  .add(note(12))
+  .gain(0.6)
+  .vib("4:0.3")
+  .room("2")
+  .lpf(slider(34.39,10,100).pow(2))
+  ._spectrum(viz_params)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // TEXTURE
@@ -165,7 +179,7 @@ _RAND: constant_motion
   ).lpf(tri.range(30,55).slow(2).pow(2))
   .room("0.5")
   .delay("0.2")
-  .lpf(slider(21.7,10,100).pow(2))
+  .lpf(slider(21.88,10,100).pow(2))
   .postgain(lvl.mul("0.75"))
   ._punchcard(viz_params)
 
@@ -181,6 +195,7 @@ _CHIME: n("- - [1,2,4] - - - [1,2,6,8] -")
   .room("1")
   .lpf(slider(100,10,100).pow(2))
   .gain(1.1)
+  ._pitchwheel()
 
 
 _NA: n("<[4 4] 4 <4 [- 4]> [- 4] - - - ->*8").scale(key)//.s("tri")
@@ -188,7 +203,7 @@ _NA: n("<[4 4] 4 <4 [- 4]> [- 4] - - - ->*8").scale(key)//.s("tri")
   // .gain(2)
   .delay("0.75")
   .s("saw")
-  .lpf(slider(53.2,10,100).pow(2))
+  .lpf(slider(24.4,10,100).pow(2))
   ._punchcard(viz_params)
   ._scope(viz_params)
 
@@ -202,15 +217,45 @@ const this_is1 = s("vox").slice(16 * 4, "<16 17 18 19 20 21 22 8\
                             7 8 9 10 8 9 9 7>*8")
   .label("<this is m u s i c>*4")
   .add(note("40"))
+  .gain(2)
+  // .layer(
+  //   x=>x,
+  //   x=>x.add(note("<0 0 0 0 0 3 3 5\
+  //                   5 0 0 0 0 3 3 5\
+  //                   5 0 0 0 0 3 3 5\
+  //                   5 5 5 5 5 5 5 3>*8"))
+  // ).gain("<1 2 1 2 1 2 2 2>*2")
 
-_THIS: this_is1.gain(2)
+_THIS: this_is1
+  // .postgain(2)
+  .lpf(slider(100,10,100).pow(2))
+  ._punchcard({...viz_params, labels:1})
 
-_MUSIC: s("vox").slice(16 * 4, "<40 41 42 43 44 42 43 44>*8").add(note("40"))
+_MUSIC: s("vox").slice(16 * 4, "<7 8 9 10 8 9 9 7>*8")
+  .layer(
+    x=>x.add(note("40")),
+    x=>x.add(note("<- 45>/2")),
+    x=>x.add(note("<- 52>")),
+    x=>x.add(note("<28@3 21>*4")),
+  )
   .gain(2)
   ._punchcard(viz_params)
 
 
+all(x=>x)
 
-all(x=>x.postgain(lvl))
 
+// await initHydra()
+
+// // load an image into a source object
+// s0.initVideo('https://media.giphy.com/media/AS9LIFttYzkc0/giphy.mp4')
+// // show the image on the screen
+// src(s0).out(o0)
+
+// s1.initCam()
+// src(s1).scale(2, 1.3, 2).invert().out(o1)
+
+// src(o1).blend(o0, ()=>1-(Math.sin(time/4))**8).out(o2)
+
+// render(o0)
 
