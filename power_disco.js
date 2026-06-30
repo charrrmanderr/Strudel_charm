@@ -370,28 +370,47 @@ _CHVX: arrange(
 //   [8, "monospace"]
 // )
 
-all(x=>x.postgain(lvl).fontFamily("x3270").theme("greenText"))
+all(x=>x.postgain(lvl).theme("sonicPink"))
 
 
 await initHydra({ detectMove: true })
-let rainShift = -10000;
+// let rainShift = -10000;
 
-shape(16, 0.08, 0.0)
-  .color(1, 1, 1)
+// shape(16, 0.08, 0.0)
+//   .color(1, 1, 1)
   
-  // 1. Create the grid first
-  .repeat(20, 5)
+//   // 1. Create the grid first
+//   .repeat(20, 5)
   
-  // 2. Modulate the grid to scatter the coordinates of the drops randomly
-  .modulate(noise(20, 1), 0.005) 
+//   // 2. Modulate the grid to scatter the coordinates of the drops randomly
+//   .modulate(noise(20, 1), 0.005) 
   
-  .scrollX(() => {
-    rainShift += mouse.x * -0.000002 + mouse.y * 0.000005; 
-    return rainShift;
-  })  
+//   .scrollX(() => {
+//     rainShift += mouse.x * -0.000002 + mouse.y * 0.000005; 
+//     return rainShift;
+//   })  
   
-  .scrollY(() => time * -0.6)
-  .blend(o0, 0.8)              
-  .out(o0)
+//   .scrollY(() => time * -0.6)
+//   .blend(o0, 0.8)              
+//   .out(o0)
 
+// load an image into a source object
+let rain1 = 'https://media.giphy.com/media/26DMWExfbZSiV0Btm/giphy.mp4'
+let rain2 = 'https://media.giphy.com/media/RlwF2vFb4y7bDnWvcO/giphy.mp4'
+    
+    
+s0.initVideo(rain1)
+src(s0).out(o0)
 
+s1.initVideo(rain1)
+src(s1).invert().out(o1)
+
+s2.initVideo(rain2)
+src(s2).scale(1, 0.5, 1, 0.5, 0).out(o2)
+
+s3.initVideo(rain2)
+src(s3).invert().out(o3)
+                            
+render(o0)
+
+v
