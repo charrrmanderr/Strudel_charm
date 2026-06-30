@@ -62,6 +62,7 @@ _DRUMS: arrange(
   [3, stack3],
   [1, fill]
   )
+  ._scope(viz_params)
   ._punchcard(viz_params)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -115,7 +116,7 @@ const bass_patt2 = n("<0 - - - [- 0] [0 -] [- 0] - 0 - - - - [0 -] [- 0] ->*8")
   .s("gm_acoustic_bass")
   .add(note("-12,-24"))
   // .gain(1.5)
-  .gain(3)
+  .gain(2)
   .lpf(slider(100,10,100).pow(2))
 
 _BASS: "<0 1>/8".pick([bass_patt1, bass_patt2])
@@ -151,7 +152,7 @@ $: intro // AS SOON AS INTRO IS DONE, NEED TO SWITCH TO MAIN (ENGAGE ^DRUMS^, ^C
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // PAD
 
-_$: A.struct("<x>")
+_PAD: A.struct("<x>")
   .scale(key)
   .s("gm_electric_guitar_muted")
   .delay("0.5")
@@ -167,19 +168,22 @@ _$: A.struct("<x>")
 // TEXTURE
 
 const constant_motion = 
-      n("<[4 0 0 0] [4 0 -1 0] [4 0 -1 4] [0 0 4 -1] [-2 0 4 6] [4 5 0 4] [0 4 0 0] [4 0 4 0]\
-          [4 0 0 0] [4 0 -1 0] [4 0 -1 4] [0 0 4 -1] [6 7 4 0] [4 0 7 8] [4 2 0 4] [8 9 4 0]>*4")
+      n("<[4 0 -1 0] [4 3 2 3] [4 0 -1 4] [2 4 5 4] [-2 0 4 6] [4 5 0 4] [0 4 2 3] [4 2 4 0]\
+          [4 0 -1 0] [4 3 2 3] [4 0 -1 4] [2 4 5 -1] [6 7 4 3] [4 2 7 8] [4 2 3 4] [8 9 4 3]>*4")
+      // n("<[4 0 0 0] [4 0 -1 0] [4 0 -1 4] [0 0 4 -1] [-2 0 4 6] [4 5 0 4] [0 4 0 0] [4 0 4 0]\
+      //     [4 0 0 0] [4 0 -1 0] [4 0 -1 4] [0 0 4 -1] [6 7 4 0] [4 0 7 8] [4 2 0 4] [8 9 4 0]>*4")
 
 _RAND: constant_motion
   .scale(key)
   .add(note(12))
   .layer(
-    x=>x.s("square").gain(0.5),
-    x=>x.s("piano").add(note(12))
-  ).lpf(tri.range(30,55).slow(2).pow(2))
+    x=>x.s("saw").attack(0.04).gain(1),
+    x=>x.s("piano").add(note("12,24"))
+  )
+  .lpf(tri.range(35,55).slow(2).pow(2))
   .room("0.5")
   .delay("0.2")
-  .lpf(slider(21.88,10,100).pow(2))
+  .lpf(slider(100,10,100).pow(2))
   .postgain(lvl.mul("0.75"))
   ._punchcard(viz_params)
 
@@ -203,7 +207,8 @@ _NA: n("<[4 4] 4 <4 [- 4]> [- 4] - - - ->*8").scale(key)//.s("tri")
   // .gain(2)
   .delay("0.75")
   .s("saw")
-  .lpf(slider(24.4,10,100).pow(2))
+  .lpf(slider(38.89,10,100).pow(2))
+  .crush(sine.range(3,5).slow(4))
   ._punchcard(viz_params)
   ._scope(viz_params)
 
@@ -228,10 +233,12 @@ const this_is1 = s("vox").slice(16 * 4, "<16 17 18 19 20 21 22 8\
 
 _THIS: this_is1
   // .postgain(2)
-  .lpf(slider(100,10,100).pow(2))
+  .lpf(slider(54.28,10,100).pow(2))
   ._punchcard({...viz_params, labels:1})
 
-_MUSIC: s("vox").slice(16 * 4, "<7 8 9 10 8 9 9 7>*8")
+_MUSIC: s("vox")
+    .slice(16 * 4, "<7 8 9 10 8 9 9 7>*8") 
+    // .slice(16 * 8, "<7 8 9 10 7 8 9 10 8 9 9 10 8 9 8 7>*16".mul(2))
   .layer(
     x=>x.add(note("40")),
     x=>x.add(note("<- 45>/2")),
@@ -239,17 +246,23 @@ _MUSIC: s("vox").slice(16 * 4, "<7 8 9 10 8 9 9 7>*8")
     x=>x.add(note("<28@3 21>*4")),
   )
   .gain(2)
-  ._punchcard(viz_params)
+  .label("<m u s i c>*8")
+  ._punchcard({...viz_params, labels:1})
 
 
-all(x=>x)
+
+// all(x=>x)
 
 
 // await initHydra()
 
 // // load an image into a source object
-// s0.initVideo('https://media.giphy.com/media/AS9LIFttYzkc0/giphy.mp4')
-// // show the image on the screen
+// let jelly = 'https://media.giphy.com/media/AS9LIFttYzkc0/giphy.mp4'
+// let kelp = 'https://media.giphy.com/media/BWYcGMzLGLjnFYP28G/giphy.mp4'
+
+
+// s0.initVideo(kelp)
+// // // show the image on the screen
 // src(s0).out(o0)
 
 // s1.initCam()
@@ -257,5 +270,5 @@ all(x=>x)
 
 // src(o1).blend(o0, ()=>1-(Math.sin(time/4))**8).out(o2)
 
-// render(o0)
+// render(o2)
 
