@@ -147,7 +147,7 @@ const intro = arrange(
   [1, fill],
   [8, stack(main_chords, stack1, bass_patt1)]
 )
-$: intro // AS SOON AS INTRO IS DONE, NEED TO SWITCH TO MAIN (ENGAGE ^DRUMS^, ^CHORDS^, ^BASS^ INDEPENDENTLY)
+$: intro // WHEN INTRO IS DONE, NEED TO SWITCH TO MAIN (ENGAGE ^DRUMS^, ^CHORDS^, ^BASS^ INDEPENDENTLY)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // PAD
@@ -183,7 +183,7 @@ _RAND: constant_motion
   .lpf(tri.range(35,55).slow(2).pow(2))
   .room("0.5")
   .delay("0.2")
-  .lpf(slider(100,10,100).pow(2))
+  .lpf(slider(53.38,10,100).pow(2))
   .postgain(lvl.mul("0.75"))
   ._punchcard(viz_params)
 
@@ -207,7 +207,7 @@ _NA: n("<[4 4] 4 <4 [- 4]> [- 4] - - - ->*8").scale(key)//.s("tri")
   // .gain(2)
   .delay("0.75")
   .s("saw")
-  .lpf(slider(38.89,10,100).pow(2))
+  .lpf(slider(23.32,10,100).pow(2))
   .crush(sine.range(3,5).slow(4))
   ._punchcard(viz_params)
   ._scope(viz_params)
@@ -254,21 +254,67 @@ _MUSIC: s("vox")
 // all(x=>x)
 
 
-// await initHydra()
-
-// // load an image into a source object
-// let jelly = 'https://media.giphy.com/media/AS9LIFttYzkc0/giphy.mp4'
-// let kelp = 'https://media.giphy.com/media/BWYcGMzLGLjnFYP28G/giphy.mp4'
-
-
-// s0.initVideo(kelp)
-// // // show the image on the screen
+// s0.initVideo(jelly)
+// // show the image on the screen
 // src(s0).out(o0)
 
 // s1.initCam()
 // src(s1).scale(2, 1.3, 2).invert().out(o1)
 
-// src(o1).blend(o0, ()=>1-(Math.sin(time/4))**8).out(o2)
+// s2.initVideo(cat)
+// // src(s2).scale(0.5, 1, 3).out(o2)
+// let mask = shape(4, 0.5, 0.001).scale(2, 0.5)
+// src(s2)
+//   .scale(0.5, 1, 3)
+//   // Prevents the video from tiling horizontally or vertically
+//   // .repeat(1, 0) 
+//   .mask(mask)
+//   .out(o2)
 
-// render(o2)
+// src(o2).add(src(s2)).out(o3)
+
+// src(o1).blend(o0, ()=>1-(Math.sin(time/4))**8).out(o3)
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// VISUALIZATION 
+await initHydra()
+
+// load an image into a source object
+let jelly = 'https://media.giphy.com/media/AS9LIFttYzkc0/giphy.mp4'
+let kelp = 'https://media.giphy.com/media/BWYcGMzLGLjnFYP28G/giphy.mp4'
+let cat = 'https://raw.githubusercontent.com/charrrmanderr/Strudel_charm/main/media/IMG_8990.mp4'
+let duck = 'https://raw.githubusercontent.com/charrrmanderr/Strudel_charm/main/media/IMG_0701.mp4'
+let animals = [cat, duck]
+
+o0: raw video
+let index = 0
+let index = 0
+setInterval(() => {
+    index = (index + 1) % animals.length
+    s0.initVideo(animals[index]) // Overwrites the buffer slot dynamically!
+  }, 4000)
+src(s0).scale(0.5, 1, 3).out(o0)
+// o1: masked video
+let mask = shape(4, 0.5, 0.02).scale(2, 0.5)
+src(s0)
+  .scale(0.5, 1, 3)
+  .mask(mask)
+  .out(o1)
+// o2: background
+src(s0)
+  .scale(0.5, 0, 1)
+  .rotate(()=>Math.sin(time/2))
+  .modulate(noise(4),0.4)
+  .kaleid(3)
+  // .mask(mask)
+  // .invert()
+  .out(o2)
+// o3: combine
+src(o1)
+  .add(o2)
+  .sub(src(o2).mask(mask))
+  .out(o3)
+// render
+render(o3)
+
 
