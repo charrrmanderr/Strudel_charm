@@ -370,47 +370,81 @@ _CHVX: arrange(
 //   [8, "monospace"]
 // )
 
-all(x=>x.postgain(lvl).theme("sonicPink"))
+all(x=>x.postgain(lvl).theme("archBtw")) // .theme("sonicPink")
 
 
-await initHydra({ detectMove: true })
-// let rainShift = -10000;
+await initHydra()
 
-// shape(16, 0.08, 0.0)
-//   .color(1, 1, 1)
-  
-//   // 1. Create the grid first
-//   .repeat(20, 5)
-  
-//   // 2. Modulate the grid to scatter the coordinates of the drops randomly
-//   .modulate(noise(20, 1), 0.005) 
-  
-//   .scrollX(() => {
-//     rainShift += mouse.x * -0.000002 + mouse.y * 0.000005; 
-//     return rainShift;
-//   })  
-  
-//   .scrollY(() => time * -0.6)
-//   .blend(o0, 0.8)              
-//   .out(o0)
 
 // load an image into a source object
 let rain1 = 'https://media.giphy.com/media/26DMWExfbZSiV0Btm/giphy.mp4'
 let rain2 = 'https://media.giphy.com/media/RlwF2vFb4y7bDnWvcO/giphy.mp4'
-    
-    
+
 s0.initVideo(rain1)
-src(s0).out(o0)
+// src(s0)
+//   .out(o0)
 
-s1.initVideo(rain1)
-src(s1).invert().out(o1)
+src(s0)
+  .blend(
+    (
+      shape(2,0.001,0.01)
+      .color(0.4,1,0.4)  // NEON GREEN :]
+      .rotate(Math.PI / 2) // VERTICAL
+      .repeatX(4)
+      .modulate(noise(3.5,1))
+      )
+    )
+  .out(o1)
 
-s2.initVideo(rain2)
-src(s2).scale(1, 0.5, 1, 0.5, 0).out(o2)
+src(s0)
+  .add(
+    shape(60,0.2, 0.01).diff(shape(60,0.2, 0.01).scale(0.95)).modulate(noise(2, 0.15))
+    .add(shape(60,0.2, 0.01).diff(shape(60,0.2, 0.01).scale(0.95)).modulate(noise(1.8, 0.15)).brightness(-0.2))
+    .add(shape(60,0.2, 0.01).diff(shape(60,0.2, 0.01).scale(0.95)).modulate(noise(1.6, 0.15)).brightness(-0.2))
+    .add(shape(60,0.2, 0.01).diff(shape(60,0.2, 0.01).scale(0.95)).modulate(noise(1.4, 0.15)).brightness(-0.2))
+    .add(shape(60,0.2, 0.01).diff(shape(60,0.2, 0.01).scale(0.95)).modulate(noise(1.2, 0.15)).brightness(-0.2))
+    .color(0.4,1,0.4)  // NEON GREEN :]
+  )
+  .out(o2)
 
-s3.initVideo(rain2)
-src(s3).invert().out(o3)
+src(s0)
+  .scale(1.2)
+  .modulate(osc(1,3,0.5))
+  .color([0,1],[1,0,0,1],[3,-1])
+  .hue(() => Math.sin(time/4))
+  .out(o3)
                             
-render(o0)
+// render(o0)
 
-v
+// BEGIN EXP
+// FUNCTION FROM JADE ROSE
+const chooseI = register('chooseI', (xs, pat) => {
+  xs = xs.map(reify);
+  if (xs.length == 0) {
+    return silence;
+  }
+
+  return pat
+    .fmap((i) => {
+      const key = Math.min(Math.max(Math.floor(i), 0), xs.length - 1);
+      return xs[key];
+    })
+    .innerJoin();
+});
+
+const alphas = [0, 1]
+// let patternA = (x) => H(chooseI(alphas, "<1 0 0 0>"))(x)
+// let patternB = (x) => H(chooseI(alphas, "<0 1 0 0>"))(x)
+// let patternC = (x) => H(chooseI(alphas, "<0 0 1 0>"))(x)
+// let patternD = (x) => H(chooseI(alphas, "<0 0 0 1>"))(x)
+let patternA = (x) => H(chooseI(alphas, "<1@8 0@8 1@8 0@8 1@8 0@8 1@8 0@8 0@8 0@8 0@8 0@8>"))(x)
+let patternB = (x) => H(chooseI(alphas, "<0@8 1@8 0@8 1@8 0@8 1@8 0@8 1@8 0@8 0@8 0@8 0@8>"))(x)
+let patternC = (x) => H(chooseI(alphas, "<0@8 0@8 0@8 0@8 0@8 0@8 0@8 0@8 1@8 0@8 1@8 0@8>"))(x)
+let patternD = (x) => H(chooseI(alphas, "<0@8 0@8 0@8 0@8 0@8 0@8 0@8 0@8 0@8 1@8 0@8 1@8>"))(x)
+
+solid(0,0,0)
+  .blend(src(s0),patternA)
+  .blend(src(o1),patternB)
+  .blend(src(o2),patternC)
+  .blend(src(o3),patternD)
+  .out()
