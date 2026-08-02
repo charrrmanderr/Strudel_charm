@@ -84,6 +84,19 @@ BASSSUB: song_structure.pick(["-", "-", subbass, subbass]).struct(rhythm).s("gm_
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // PAD
+_$: stack(
+  note("<0 0 0 0 - 0 - 0 - - 0 - - 0 - ->*8"),
+  note("<1 1 1 1 - 1 - 1 - - 1 - - 1 - ->*8"),
+  note("<4 4 4 4 - 4 - 4 - - 4 - - 4 - ->*8")
+  )
+  .s("bytebeat")
+  .scale(key)
+  .transpose("12")
+  .room("2")
+  .gain(0.8)
+  .legato("1.5")
+  .lpf(sine.range(3000,4000))
+
 $: song_structure.pick(["-", "-", "-", 
   stack(
   note("<0 0 0 0 - 0 - 0 - - 0 - - 0 - ->*8"),
@@ -98,13 +111,21 @@ $: song_structure.pick(["-", "-", "-",
   .lpf(sine.range(3000,4000))
   ._scope(viz_params)
 
+_$: stack(
+  note("<0 -4 -5 -3>/2"),
+  note("<4 1 2 1>/2"))
+  .s("gm_blown_bottle")
+  .scale(key)
+  .transpose(12)
+  .gain(1)
+  ._spectrum(viz_params)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // TEXTURE
 const tex1 = note("<0 1 2 3 - ->*8")
 const tex2 = note("<0 1 2 3 ->*8")
 $: song_structure
-  .pick(["-", "<0 1>/2", "-", "<0 1>/2"])
+  .pick(["-", "<0 1>/2", "-", "-"])
   .pick([tex1, tex2])
   .scale(key)
   .s("saw")
@@ -128,13 +149,7 @@ const melody1 = n("<0@4 - - - <3 4>>*4").scale(key).add(note(24)).layer(
 $: song_structure.pick(["-", "-", melody1, "-"])._scope(viz_params)
 
 
-_$: stack(
-  note("<0 -4 -5 -3>/2"),
-  note("<4 1 2 1>/2"))
-  .s("gm_blown_bottle")
-  .scale(key)
-  .transpose(12)
-  .gain(2)
+
 
 _$: note("<[4 4] [- 4] [- 4] [- 6] 1 - - -\
           [1 1] [- 1] [- 1] [- 2] 0 - - ->*4")
@@ -142,13 +157,54 @@ _$: note("<[4 4] [- 4] [- 4] [- 6] 1 - - -\
   .transpose(12)
   .s("supersaw")
   .detune(1)
+  // .lpf(3000)
+  .room("1")
+  .gain(2)
+  ._pianoroll(viz_params)
+
+_$: note("<0 <1 [- 1@3]> <4 4 [- 4@3] 4> 1>/2")
+  .scale(key)
+  .layer(
+    x=>x.transpose("12").gain(1.5),
+    x=>x.transpose("24").gain(0.5)
+  )
+  // .transpose("12")
+  // .s("gm_kalimba,tri")
+  .s("gm_choir_aahs")
+  .penv("<10 5 10 -2>/2")
+  .pattack("<1 0.5 0.3 0.65>/2")
+  .distort(1)
+  .vib("8:<0.2 0.2 0.5 0.2>/2")
   .room("1")
 
-
-// all(x=>x)
+all(x=>x.theme("sonicPink"))
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // VISUALIZATION 
-// await initHydra()
+await initHydra()
 
+// solid(1,0.267,0.8,0.5).out(o0)   // HOT PINK
+// solid(1,1,1,1).out(o0)  // WHITE
+// solid(0.97,0.94,0.89,1).out(o2)  // BEIGE
+// solid(0.08,0.54,1,1).out(o1)  // BLUE
+// solid(0.97,0.41,0.02,1).out(o3)  // ORANGE
+
+src(o0)
+  .modulate(noise(3),0.005)
+  .blend(
+      shape(3).color(1,1,1,1)  // WHITE
+    .add(
+      shape(4).color(0.08,0.54,1,1))  // BLUE
+    .add(
+      shape(5).color(0.97,0.41,0.02,1))  // ORANGE
+    // .add(
+      // shape(6).color(0.97,0.94,0.89,1)).scrollX(1)  // BEIGE
+    ,0.01)
+  .out(o0)
+
+osc(120,0.01,0.2).modulate(noise(10)).luma(1,0.1).color(0.15,0.98,0,1).pixelate(60,60).luma(0.38,0.1).out(o1)
+
+src(o0).add(o1).out(o2)
+
+render(o2)
