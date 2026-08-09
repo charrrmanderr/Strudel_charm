@@ -1,0 +1,320 @@
+/*
+        ██                                                             
+      ██                                                               
+    ██        █████  █       █      █      █████     ██     ██    █████   
+  ██        ██       █       █     █ █     █   ███   █ ██ ██ █  ██     ██ 
+██         █         █       █    █   █    █     █   █   █   █        ██  
+██         █         █████████    █████    █   ███   █       █    █████   
+  ██       █         █       █   █     █   █████     █       █        ██  
+    ██      ██       █       █  █       █  █    █    █       █  ██     ██ 
+      ██      █████  █       █  █       █  █     █   █       █    █████   
+        ██  
+*/
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// CONTROL PARAMETERs
+const cpm = 120/4
+setCpm(cpm)
+const key = "G:major"
+const lvl = "0.5"
+const viz_params = {height:100, width:1500}
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// IMPORTS
+samples({
+  vox: 'vox_chorus.wav',
+}, 'https://raw.githubusercontent.com/kai-xi/music4machines/main/samples/');
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// DRUMS
+const stack1 = stack(
+  s("<- hh - hh - hh - hh>*4").delay("<0.2 0.6>").room("1").bank("RolandTR505"),
+  s("bd:1").room("1"),
+  s("<- - sh - sh sh - sh - sh - sh sh - sh sh>*16").delay("0.2").vowel("a o e").gain(20)
+)
+
+const stack2 = stack(
+  s("< - - hh - hh hh - hh - hh - hh hh - hh hh>*16").room("1").bank("RolandTR808"),
+  s("bd:1 [- bd:0] - -").room("1"),
+  s("< - cp - cp - [cp - - cp] - cp>*4").delay("0.2").room("0.2"),
+  s("sh*16").delay("0.2").gain(perlin.range(0.3, 0.7))
+)
+
+const stack3 = stack(
+  s("<- hh - hh - hh - hh>*4").delay("<0.2 0.6>").room("1").bank("RolandTR505"),
+  s("bd:2 - - - [- bd:0] [bd:1 -] [- bd:2] -").room("1"),
+  s("- - cp - - - [cp -] -").delay("0.2").room("0.2"),
+  s("<- - sh - sh sh - sh - sh - sh sh - sh sh>*16").delay("0.2").vowel("a o e").gain(20)
+)
+
+const fill = stack(
+  s("[ht ht] [ht -] [- mt] - - [- -mt] [mt mt] [lt lt]").room("0.5").legato("0.75 1"),
+  s("[[bd bd] bd [- bd] -] [bd*4 bd*8]").legato(0.2).distort(1).gain(0.5)
+)
+
+_DRUMS: arrange(
+  [3, stack1],
+  [1, fill],
+  [3, stack2],
+  [1, fill],
+  [3, stack3],
+  [1, fill],
+  [3, stack3],
+  [1, fill]
+  )
+  ._scope(viz_params)
+  ._punchcard(viz_params)
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// CHORDS
+
+const chord1 = n("0,1,2,4,5,6,<8 9>,<12 12 15 12>")
+const chord2 = n("-2,0,2,4,5,<6 7>,<- 9 9 [6,8]>,12")
+const chord3 = n("-3,1,4,5,<6 5 6 5>")
+const chord4 = n("<-7 -8 -6 -5>,-3,1,4, <- 6 5 [5,6]>")
+
+const A = arrange(
+  [4, chord1],
+  [4, chord2]
+  )
+const B = arrange(
+  [4, chord3],
+  [4, chord4]
+  )
+
+
+_CHORDS1: "<0 0 0 0>".slow(8).pick([A, B])
+  .struct("<x -> <- x> x - x [- x] [- x] x")
+  .scale(key)
+  .s("gm_electric_guitar_muted")
+  .room("1")
+  .delay("0.5")
+  .lpf(slider(100,10,100).pow(2))
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// BASS
+const bass_patt1 = 
+      note("<0 - - - - [- 0] [2 4] [6 -]\
+             0 0 - - - [- 0] [2 4] [6 -]\
+             0 - - - - [- 0] [2 4] [6 -]\
+             0 - 0 0 - [- 0] [2 4] [7 -]\
+             -2 - - - - [- 2] [4 5] [6 -]\
+             -2 -2 - - - [- 2] [2 4] [7 -]\
+             -2 - - -2 - [- 2] [2 4] [6 -]\
+             -2 -2 - -2 -2 [- 2] [2 4] [7 -]>*8")
+  .s("gm_acoustic_bass")
+  .gain(3)
+  .room("1")
+  .scale(key)
+  .add(note(-24))
+
+const bass_patt2 = n("<0 - - - [- 0] [0 -] [- 0] - 0 - - - - [0 -] [- 0] ->*8")
+  .scale(key)
+  .add(note("<0 -3>/4"))
+  // .s("gm_clavinet:1")
+  .s("gm_acoustic_bass")
+  .add(note("-12,-24"))
+  // .gain(1.5)
+  .gain(2)
+  .lpf(slider(100,10,100).pow(2))
+
+_BASS: "<0 1>/8".pick([bass_patt1, bass_patt2])
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// INTRO DECK
+const intro_chords = A
+  .struct("<x -> <- x> x - x [- x] [- x] x")
+  .scale(key)
+  .s("gm_electric_guitar_muted")
+  .delay("0.5")
+  .layer(
+    x=>x.attack("0.08").release("0.5").room("1").gain(0.7), 
+    x=>x.attack("0.20").release("1.0").add(note(12)).gain(0.3).vib("4:0.3").room("2").delay("1.5")
+    )
+  .lpf(slider(100,10,100).pow(2))
+
+const main_chords = A
+  .struct("<x -> <- x> x - x [- x] [- x] x")
+  .scale(key)
+  .s("gm_electric_guitar_muted")
+  .room("1")
+  .delay("0.5")
+  .lpf(slider(100,10,100).pow(2))
+
+const intro = arrange(
+  [7, intro_chords],
+  [1, fill],
+  [8, stack(main_chords, stack1, bass_patt1)]
+)
+$: intro // WHEN INTRO IS DONE, NEED TO SWITCH TO MAIN (ENGAGE ^DRUMS^, ^CHORDS^, ^BASS^ INDEPENDENTLY)
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// PAD
+
+_PAD: A.struct("<x>")
+  .scale(key)
+  .s("gm_electric_guitar_muted")
+  .delay("0.5")
+  .attack("0.20").release("1.0")
+  .add(note(12))
+  .gain(0.6)
+  .vib("4:0.3")
+  .room("2")
+  .lpf(slider(34.39,10,100).pow(2))
+  ._spectrum(viz_params)
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// TEXTURE
+
+const constant_motion = 
+      n("<[4 0 -1 0] [4 3 2 3] [4 0 -1 4] [2 4 5 4] [-2 0 4 6] [4 5 0 4] [0 4 2 3] [4 2 4 0]\
+          [4 0 -1 0] [4 3 2 3] [4 0 -1 4] [2 4 5 -1] [6 7 4 3] [4 2 7 8] [4 2 3 4] [8 9 4 3]>*4")
+      // n("<[4 0 0 0] [4 0 -1 0] [4 0 -1 4] [0 0 4 -1] [-2 0 4 6] [4 5 0 4] [0 4 0 0] [4 0 4 0]\
+      //     [4 0 0 0] [4 0 -1 0] [4 0 -1 4] [0 0 4 -1] [6 7 4 0] [4 0 7 8] [4 2 0 4] [8 9 4 0]>*4")
+
+_RAND: constant_motion
+  .scale(key)
+  .add(note(12))
+  .layer(
+    x=>x.s("saw").attack(0.04).gain(1),
+    x=>x.s("piano").add(note("12,24"))
+  )
+  .lpf(tri.range(35,55).slow(2).pow(2))
+  .room("0.5")
+  .delay("0.2")
+  .lpf(slider(53.38,10,100).pow(2))
+  .postgain(lvl.mul("0.75"))
+  ._punchcard(viz_params)
+
+
+
+
+_CHIME: n("- - [1,2,4] - - - [1,2,6,8] -")
+  .scale(key)
+  .s("gm_epiano2")
+  .attack("0.02")
+  .release("0.7")
+  .vib("4:0.3")
+  .room("1")
+  .lpf(slider(100,10,100).pow(2))
+  .gain(1.1)
+  ._pitchwheel()
+
+
+_NA: n("<[4 4] 4 <4 [- 4]> [- 4] - - - ->*8").scale(key)//.s("tri")
+  .add(note("0,4,5,<7 9 7 12>,9"))
+  // .gain(2)
+  .delay("0.75")
+  .s("saw")
+  .lpf(slider(23.32,10,100).pow(2))
+  .crush(sine.range(3,5).slow(4))
+  ._punchcard(viz_params)
+  ._scope(viz_params)
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// VOX
+
+const this_is1 = s("vox").slice(16 * 4, "<16 17 18 19 20 21 22 8\
+                            16 17 18 19 20 21 22 8\
+                            8 17 18 19 20 21 22 0\
+                            7 8 9 10 8 9 9 7>*8")
+  .label("<this is m u s i c>*4")
+  .add(note("40"))
+  .gain(2)
+  // .layer(
+  //   x=>x,
+  //   x=>x.add(note("<0 0 0 0 0 3 3 5\
+  //                   5 0 0 0 0 3 3 5\
+  //                   5 0 0 0 0 3 3 5\
+  //                   5 5 5 5 5 5 5 3>*8"))
+  // ).gain("<1 2 1 2 1 2 2 2>*2")
+
+_THIS: this_is1
+  // .postgain(2)
+  .lpf(slider(54.28,10,100).pow(2))
+  ._punchcard({...viz_params, labels:1})
+
+_MUSIC: s("vox")
+    .slice(16 * 4, "<7 8 9 10 8 9 9 7>*8") 
+    // .slice(16 * 8, "<7 8 9 10 7 8 9 10 8 9 9 10 8 9 8 7>*16".mul(2))
+  .layer(
+    x=>x.add(note("40")),
+    x=>x.add(note("<- 45>/2")),
+    x=>x.add(note("<- 52>")),
+    x=>x.add(note("<28@3 21>*4")),
+  )
+  .gain(2)
+  .label("<m u s i c>*8")
+  ._punchcard({...viz_params, labels:1})
+
+
+
+// all(x=>x)
+
+
+// s0.initVideo(jelly)
+// // show the image on the screen
+// src(s0).out(o0)
+
+// s1.initCam()
+// src(s1).scale(2, 1.3, 2).invert().out(o1)
+
+// s2.initVideo(cat)
+// // src(s2).scale(0.5, 1, 3).out(o2)
+// let mask = shape(4, 0.5, 0.001).scale(2, 0.5)
+// src(s2)
+//   .scale(0.5, 1, 3)
+//   // Prevents the video from tiling horizontally or vertically
+//   // .repeat(1, 0) 
+//   .mask(mask)
+//   .out(o2)
+
+// src(o2).add(src(s2)).out(o3)
+
+// src(o1).blend(o0, ()=>1-(Math.sin(time/4))**8).out(o3)
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// VISUALIZATION 
+await initHydra()
+
+// load an image into a source object
+let jelly = 'https://media.giphy.com/media/AS9LIFttYzkc0/giphy.mp4'
+let kelp = 'https://media.giphy.com/media/BWYcGMzLGLjnFYP28G/giphy.mp4'
+let cat = 'https://raw.githubusercontent.com/charrrmanderr/Strudel_charm/main/media/IMG_8990.mp4'
+let duck = 'https://raw.githubusercontent.com/charrrmanderr/Strudel_charm/main/media/IMG_0701.mp4'
+let animals = [cat, duck]
+
+o0: raw video
+let index = 0
+let index = 0
+setInterval(() => {
+    index = (index + 1) % animals.length
+    s0.initVideo(animals[index]) // Overwrites the buffer slot dynamically!
+  }, 4000)
+src(s0).scale(0.5, 1, 3).out(o0)
+// o1: masked video
+let mask = shape(4, 0.5, 0.02).scale(2, 0.5)
+src(s0)
+  .scale(0.5, 1, 3)
+  .mask(mask)
+  .out(o1)
+// o2: background
+src(s0)
+  .scale(0.5, 0, 1)
+  .rotate(()=>Math.sin(time/2))
+  .modulate(noise(4),0.4)
+  .kaleid(3)
+  // .mask(mask)
+  // .invert()
+  .out(o2)
+// o3: combine
+src(o1)
+  .add(o2)
+  .sub(src(o2).mask(mask))
+  .out(o3)
+// render
+render(o3)
+
+

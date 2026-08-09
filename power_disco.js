@@ -33,14 +33,28 @@ const stack1 = stack(
 
 const stack2 = stack(
   s("<[bd:1*6 [- bd:1]] [- bd:1] [- bd:0*2] ->*4").bank("RolandTR909").room("0.5"),
-  s("<- cp - <cp [cp - - cp]>>*4").room("0.3").delay("<0 1>"),
+  s("<- cp - <cp [cp - - cp]>>*4").room("0.3").delay("<0 0 0 0 1 1 1 [1 0]>*2"),
   s("sh").seg(16).legato(2).room("0.4").phaser(0.5)
   )
 
+const stack3 = stack(
+  s("bd:1 - - -").bank("RolandTR909").room("1"),
+  s("<- bd - - bd bd - - <- bd> bd - - bd bd - ->*16").bank("RolandTR707").distort(1),
+  s("<- <cp cp cp [cp cp]>>*8").lpf(40000),
+  s("<[- - hh - hh hh hh hh] [hh hh hh hh] [- hh hh hh] [- hh hh hh]>*4").bank("<RolandTR606 RolandTR808>"),
+  s("rim").struct("<- - - [x x] - - - - - - - [x <- x>] - <x -> - <<[x x] -> -> - - - - - - - - - - - - - - - ->*16")
+    .lpf(4000)
+)
+
 const drum_arr = arrange(
-  [8, stack1],
-  [8, stack2]
+  [64, arrange(
+        [8, stack1],
+        [8, stack2])],
+  // [32, arrange(
+  //       [8, stack2],
+  //       [8, stack3])]
 ).label("<i l o v e m u s i c>*8")
+
 
 DRUM: drum_arr.pan(0.55)._punchcard({ ...viz_params, labels: 1 })
 
@@ -66,33 +80,6 @@ PAD: bottle_chords._spectrum(viz_params)
 DRONE: bagpipe_drone.pan(0.6)._scope(viz_params)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// TREBBLE ELEMENTS
-const bagpipe_melody = note("<9@3 [8 7] 6@3 [7 8] 7@4 4@3 [7 4] \
-                              6@3 [5 4] 3@3 [4 5] 4@4 1@3 [7 8]>*8")
-  .scale("E3:Minor")
-  .s("gm_bagpipe")
-  .gain(0.6)
-_BPMELODY: bagpipe_melody
-
-const fiddle1 = n("<7 0 0 7 6 4  7          0     0 7 4 6 7 - 7 <- [4 6]>>*16").scale("E4:Minor").s("gm_fiddle")
-const fiddle2 = n("<9 2 2 9 8 6 <8 9 10 7> <0 10> 4 9 6 8 6 - 5 <- [5 4]>>*16").scale("E4:Minor").s("gm_fiddle").gain(0.6)
-_FIDDLE: stack(
-  fiddle1,
-  fiddle2
-  )
-
-
-_TREBBLE_STACK: arrange(
-  [8, "-"],
-  [4, bagpipe_melody],
-  [4, stack(bagpipe_melody, fiddle1)],
-  [8, bagpipe_melody],
-  [8, stack(fiddle1, fiddle2)],
-  [32, "-"]
-)
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // BASSLINES
 const acoustic_bass = n("<<0 1> - - <-3!3 4>>*4")
   .scale("E3:Minor")
@@ -108,7 +95,7 @@ const synth_bass = n("<0!16 1!7 -1!4 -2!4 -3>*16")
 
 const dark_bass = n("<\
         0 - 0 0 4 0 0 0 - 1 - 1  -  2  0  0 \
-        2 2 2 2 2 1 1 1 1 1 1 1 0 0 -2 -3>*16")
+        2 2 2 2 1 1 1 1 1 1 1 1 0 0 -2 -3>*16")
   .scale("[E3,E2,E1]:<Minor@3 phrygian>*2")
   .s("supersaw")
   .delay(0.4)
@@ -124,11 +111,13 @@ const dark_bass2 = n("<\
   .scale("[E2,E1]:<Minor@3 phrygian>*2")
   .s("supersaw")
   .delay(0.4)
-  .legato(0.4)
+  .legato(0.8)
+  .velocity("<1 0.8>*16").pan("<0.5 <0.3 0.7>*16>")
   .room("0.7")
   .lpf(10000)
-  .lpq(3)
-  .gain(3)
+  // .lpq(3)
+  .gain(2.5)
+
 
 _BASS: "<0 1 0 0 0 1 [1 0] 1>/8".pick([dark_bass, dark_bass2])
 BASS: arrange(
@@ -157,6 +146,7 @@ const punch_chords = n("<[0,2,4,7] - - - - - [0,2,4,7] - - - - - [0,2,4,7] - - -
   .s("supersaw")
   .release(0.5)
 
+
 const punch_chords_var = punch_chords
   .release(0.4)
   .legato(0.2)
@@ -183,10 +173,20 @@ const punch_chords_var2 =
 _PUNCH: punch_chords_var._punchcard(viz_params)
 PUNCH_ARR: arrange(
   [8, "-"],
-  [4, punch_chords],
+  [4, punch_chords], 
   [4, punch_chords_var],
+  [8, "-"],
   [8, punch_chords_var1],
   [8, punch_chords_var2],
+  [8, "-"],
+  [4, punch_chords_var],
+  [4, punch_chords],
+  [8, punch_chords_var1],
+  [8, "-"],
+  [4, punch_chords], 
+  [4, punch_chords_var],
+  [8, "-"],
+  [8, punch_chords_var1]
 ).pan(0.4)._punchcard(viz_params)
 
 const upper = n("<\
@@ -199,7 +199,8 @@ const velocity = "<\
      [0 1 1 0]@4 - - [0 1 1 0]@4 - - [0 1 1 0]@4 [0 1 1 0]@4 - - [0 1 1 0]@4 - - [0 1 1 0]@4\
      [0 1 1 0]@4 - - [0 1 1 0]@4 - - [0 1 1 0]@4 [0 1 1 0]@4 - - [0 1 1 0]@4 - - [0 1 1 0]@4>*16".pick([1, 0.7])
 
-_POWER_STACK: stack(upper, lower)
+
+const power_stack = stack(upper, lower)
   .scale("E3:Minor")
   .s("saw")
   .release(0.4)
@@ -207,6 +208,18 @@ _POWER_STACK: stack(upper, lower)
   .velocity(velocity)
   .gain(1.1)
   .room("1")
+  //.lpf(slider(1,1,100).pow(2))
+POWER_STACK: arrange(
+  [16, "-"],
+  [32, power_stack],
+  [8, "-"],
+  [8, power_stack],
+  [8, "-"],
+  [8, power_stack],
+  [8, "-"],
+  [8, power_stack],
+)
+  // .transpose("0,12")
   ._pianoroll(viz_params)
 
 const ctrl_ptrn = "<2 1 1 2 1 1 2 1 1 2 1 1 3 1 1 ->*16"
@@ -223,27 +236,14 @@ _MINI: mini_alt._punchcard(viz_params)
 
 
 
-_TEX_MAIN: arrange(
-  [8, twinkle_chord_arp],
-  [4, punch_chords],
-  [4, punch_chords.release(0.4).legato(0.2).off(1/16, x=>x).off(1/8, x=>x)],
-  [8, twinkle_chord_arp],
-  [2, punch_chords],
-  [6, stack(punch_chords, mini_alt)],
-  [8, "-"],
-  [4, punch_chords],
-  [4, punch_chords.release(0.4).legato(0.2).off(1/16, x=>x).off(1/8, x=>x)],
-  [8, twinkle_chord_arp],
-  [2, punch_chords],
-  [6, stack(punch_chords, mini_alt)]
-)._pianoroll(viz_params)
 
 
 
-_BUBBLE: n("<3 - 2 4 - 2 - <- 3> - <- 2> - <- 4> - <- 2> - ->*16").scale("E5:Minor")
+
+const bubble = n("<3 - 2 4 - 2 - <- 3> - <- 2> - <- 4> - <- 2> - ->*16").scale("E5:Minor")
   .s("tri")
   .layer(x=>x//,
-         // x=>x.off(1/32, add(note(12)))
+         // x=>x.off(1/2, add(note(-12)))
         )
   .crush(5)
   .room("0.5")
@@ -253,30 +253,198 @@ _BUBBLE: n("<3 - 2 4 - 2 - <- 3> - <- 2> - <- 4> - <- 2> - ->*16").scale("E5:Min
   .lpq(2)
   .release(0.5)
   .delay("0.25")
+_BUBBLE: bubble._punchcard(viz_params)
+
+
+const voice1 = n("<4 - - 6 3 - [- - [9] [8]] [- [6] - -]>*4")
+const voice2 = n("<2 - - 3 1 - [- - [9] [8]] [- [6] - -]>*4")
+const voice3 = n("<4 - - 6 3 - [- - 11 10] [- [8,9] - -]>*4")
+const voices = stack(
+    voice1,
+    voice2,
+    voice3
+  )
+  .scale("E5:Minor")
+  // .gain(0.8)
+  // .s("tri")
+  .s("gm_epiano1:2")
+  .delay(0.8)
+  .room("2")
+_VOICES: voices._punchcard(viz_params)
+
+const ctvox1 = n("<0 - - 1 2 - [- - - -] [4 -]>*4")
+const ctvox2 = n("<4 - - 6 3 - [- - - -] [6 -]>*4").velocity(0.3)
+const contravox = stack(
+    ctvox1,
+    ctvox2
+  )
+  .gain(0.5)
+  .scale("E3,E4:Minor")
+  // .s("gm_epiano1:10")
+  .s("supersaw")
+  .lpf(20000)
+  .release(0.4)
+  .room("1")
+  // .gain(0.85)
+_CONTRAVOX: contravox._punchcard(viz_params)
+_ALLVOX: arrange(
+  [4, "-"],
+  [4, voices],
+  [8, stack(voices, contravox)],
+  [4, "-"],
+  [4, voices],
+  [8, stack(voices, contravox)],
+  [8, "-"]
+)._punchcard(viz_params)
+
+
+const bg_twin = n("<- - - - - - [- - 11 10] [9 8 7 -]>*4")
+  .scale("E5:Minor")
+  .s("gm_epiano1:8")
+  .delay(2)
+  .room("2")
+  .gain(0.5)
+_BG_TWIN: bg_twin._pitchwheel()
+
+
+_$: n("<[0,-5]!2 -!2 [1,-5] - [2,-2] [1,-3]>*4")
+  .ply("4")
+  .scale("E3,E4:<Minor Phrygian>*2")
+  .s("supersaw")
+  .delay("0.35")
+  .legato(0.4)
   .gain(2)
-  ._punchcard(viz_params)
-
-all(x=>x.postgain(lvl).theme("archBtw"))
-
-
-await initHydra({ detectMove: true })
-let rainShift = 0;
-
-shape(16, 0.08, 0.0)
-  .color(1, 1, 1)
   
-  // 1. Create the grid first
-  .repeat(20, 5)
-  
-  // 2. Modulate the grid to scatter the coordinates of the drops randomly
-  .modulate(noise(20, 1), 0.005) 
-  
-  .scrollX(() => {
-    rainShift += mouse.x * -0.000002; 
-    return rainShift;
-  })  
-  
-  .scrollY(() => time * -0.6)
-  .blend(o0, 0.8)              
-  .out(o0)
 
+const doot = n("<3 - <- -1> 4 3 - - <- -1 [- 2]>>*4")
+  .scale("E5:Minor")
+  .gain(1.5)
+  .ply("2")
+  .off(1/16, x=>x.add(note(12)).lpf(1000).gain(0.5))
+  .s("piano")
+  .delay("1")
+  .room("1")
+_DOOT: "<0 1 0>/8".pick(["-", doot])._punchcard(viz_params)
+  
+
+const chvx = n("<[0,2,3]@2 - [1,4,6] [-1,1,2]@2 - [0,2,4]>*4")
+  .scale("E4:Minor")
+  .s("gm_pad_warm:<0 1>/4")
+  .release(0.5)
+  .phaser("<2 3 1>*2")
+  .gain("2")
+const chopchvx1 = n("<[0,2,3]@(3,8,0) - [1,4,6] [-1,1,2]@(3,8,0) - [0,2,4]>*4")
+  .scale("E4:Minor")
+  .s("supersaw")
+  .legato(0.5)
+  .off(1/16, x=>x)
+  .phaser("<2 3 1>*2")
+  .gain("2")
+const chopchvx2 = n("<- - - [3 2 3 4] [3 - - 3] - - ->*4").velocity(1.5)
+  .scale("E4:Minor")
+  .s("supersaw")
+  .legato(0.5)
+  .off(1/16, x=>x)
+  .phaser("<2 3 1>*2")
+  .gain("2")
+
+_CHVX: arrange(
+  [8, chvx._scope(viz_params)],
+  [4, stack(
+    chvx._scope(viz_params), 
+    chopchvx1._scope(viz_params))],
+  [4, stack(
+    chvx._scope(viz_params), 
+    chopchvx1._scope(viz_params), 
+    chopchvx2._scope(viz_params))],
+  [8, "-"]
+)
+
+
+
+// const font_family_pattern = arrange(
+//   [64, "monospace"],
+//   [8, "galactico"],
+//   [8, "monospace"],
+//   [8, "galactico"],
+//   [8, "monospace"]
+// )
+
+all(x=>x.postgain(lvl).theme("archBtw")) // .theme("sonicPink")
+
+
+await initHydra()
+
+
+// load an image into a source object
+let rain1 = 'https://media.giphy.com/media/26DMWExfbZSiV0Btm/giphy.mp4'
+let rain2 = 'https://media.giphy.com/media/RlwF2vFb4y7bDnWvcO/giphy.mp4'
+
+s0.initVideo(rain1)
+// src(s0)
+//   .out(o0)
+
+src(s0)
+  .blend(
+    (
+      shape(2,0.001,0.01)
+      .color(0.4,1,0.4)  // NEON GREEN :]
+      .rotate(Math.PI / 2) // VERTICAL
+      .repeatX(4)
+      .modulate(noise(3.5,1))
+      )
+    )
+  .out(o1)
+
+src(s0)
+  .add(
+    shape(60,0.2, 0.01).diff(shape(60,0.2, 0.01).scale(0.95)).modulate(noise(2, 0.15))
+    .add(shape(60,0.2, 0.01).diff(shape(60,0.2, 0.01).scale(0.95)).modulate(noise(1.8, 0.15)).brightness(-0.2))
+    .add(shape(60,0.2, 0.01).diff(shape(60,0.2, 0.01).scale(0.95)).modulate(noise(1.6, 0.15)).brightness(-0.2))
+    .add(shape(60,0.2, 0.01).diff(shape(60,0.2, 0.01).scale(0.95)).modulate(noise(1.4, 0.15)).brightness(-0.2))
+    .add(shape(60,0.2, 0.01).diff(shape(60,0.2, 0.01).scale(0.95)).modulate(noise(1.2, 0.15)).brightness(-0.2))
+    .color(0.4,1,0.4)  // NEON GREEN :]
+  )
+  .out(o2)
+
+src(s0)
+  .scale(1.2)
+  .modulate(osc(1,3,0.5))
+  .color([0,1],[1,0,0,1],[3,-1])
+  .hue(() => Math.sin(time/4))
+  .out(o3)
+                            
+// render(o0)
+
+// BEGIN EXP
+// FUNCTION FROM JADE ROSE
+const chooseI = register('chooseI', (xs, pat) => {
+  xs = xs.map(reify);
+  if (xs.length == 0) {
+    return silence;
+  }
+
+  return pat
+    .fmap((i) => {
+      const key = Math.min(Math.max(Math.floor(i), 0), xs.length - 1);
+      return xs[key];
+    })
+    .innerJoin();
+});
+
+const alphas = [0, 1]
+// let patternA = (x) => H(chooseI(alphas, "<1 0 0 0>"))(x)
+// let patternB = (x) => H(chooseI(alphas, "<0 1 0 0>"))(x)
+// let patternC = (x) => H(chooseI(alphas, "<0 0 1 0>"))(x)
+// let patternD = (x) => H(chooseI(alphas, "<0 0 0 1>"))(x)
+let patternA = (x) => H(chooseI(alphas, "<1@8 0@8 1@8 0@8 1@8 0@8 1@8 0@8 0@8 0@8 0@8 0@8>"))(x)
+let patternB = (x) => H(chooseI(alphas, "<0@8 1@8 0@8 1@8 0@8 1@8 0@8 1@8 0@8 0@8 0@8 0@8>"))(x)
+let patternC = (x) => H(chooseI(alphas, "<0@8 0@8 0@8 0@8 0@8 0@8 0@8 0@8 1@8 0@8 1@8 0@8>"))(x)
+let patternD = (x) => H(chooseI(alphas, "<0@8 0@8 0@8 0@8 0@8 0@8 0@8 0@8 0@8 1@8 0@8 1@8>"))(x)
+
+solid(0,0,0)
+  .blend(src(s0),patternA)
+  .blend(src(o1),patternB)
+  .blend(src(o2),patternC)
+  .blend(src(o3),patternD)
+  .out()
