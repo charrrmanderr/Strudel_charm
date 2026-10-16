@@ -33,23 +33,40 @@ const melody = note("<f3 b3 c4 f3 b3 c4 f3 b3 g3 b3 c4 g3 b3 c4 g3 b3 a3 b3 c4 a
 
 const melody_arr = arrange(
   [8, melody.ethereal_sound()],
-  [16, melody.substant_sound()]
+  [32, melody.substant_sound()]
 )
-const melody_gain = arrange([7, "1"], [1, "0"], [16, "2"])
+const melody_gain = arrange([7, "1"], [1, "0"], [32, "2"])
 
 MELODY: melody_arr.gain(melody_gain)
   ._scope(viz_params)
 
 
 
-_$TAB: note("<- - [c4,e4] - - [c4,e4] - [c4,e4] - - [c4,d4] - - [c4,d4] - [c4,d4] - - [b3,g4] - - [b3,g4] - [b3,c4] - - [c4,g4] - - [c4,g4] - [c4,c4]>*8")
-  .s("gm_epiano1:<1 9 10>").gain(2)
+const stab_on = arrange(
+  [8, "0"],
+  [16, "0"],
+  [16, "1"]
+)
+
+$TAB: note("<- - [c4,e4] - - [c4,e4] - [c4,e4] - - [c4,d4] - - [c4,d4] - [c4,d4] - - [b3,g4] - - [b3,g4] - [b3,c4] - - [c4,g4] - - [c4,g4] - [c4,c4]>*8")
+  .s("gm_epiano1:<1 9 10>").gain("2".mul(stab_on))
   .room("1")
   .delay("0.5")
   .vib("2:0.2")
 
-_$COOP: note("<- - e4@6 - - d4@6 - - g4@6 - - d4@6>*8").s("gm_pad_metallic:1").room("1").penv("12").pattack("<0.5 0.2>").velocity(1.2)
-_$COOP2: note("<- - a4@6 - - g4@6 - - b4@6 - - c5@6>*8").s("gm_pad_metallic:1").room("1").penv("12").pattack("<0.1>").velocity(1.2)
+const scoop1_on = arrange(
+  [16, "0"],
+  [8, "1"],
+  [16, "1"]
+)
+const scoop2_on = arrange(
+  [20, "0"],
+  [4, "1"],
+  [16, "1"]
+)
+
+$COOP: note("<- - e4@6 - - d4@6 - - g4@6 - - d4@6>*8").s("gm_pad_metallic:1").room("1").penv("12").pattack("<0.5 0.2>").velocity(1.2).gain("1".mul(scoop1_on))
+$COOP2: note("<- - a4@6 - - g4@6 - - b4@6 - - c5@6>*8").s("gm_pad_metallic:1").room("1").penv("12").pattack("<0.1>").velocity(1.2).gain("1".mul(scoop2_on))
 
 const drums1 = stack(
   s("bd*2"),
@@ -77,8 +94,10 @@ const fill1 = stack(
 const drums_arr = arrange(
   [7, "-"],
   [1, fill1],
-  [12, drums1],
-  [4, drums2]
+  [15, drums1],
+  [1, fill1],
+  [15, drums2],
+  [1, fill1]
 )
 
 DRUMS: drums_arr
@@ -105,7 +124,7 @@ const bass2 = n("<0 1 -1 [2@3 1]>")
   .gain(3)
   .room("1")
 
-BASS: arrange([8, "-"], [12, bass1], [4, bass2])
+BASS: arrange([8, "-"], [32, bass1])
 
 
 HARM: n("<0 1 2 4>")
@@ -117,7 +136,7 @@ HARM: n("<0 1 2 4>")
   .gain(2)
   .room("1")
 
-_COUNTER: n("<- - 0 - - 0 - -3>*8")
+COUNTER: n("<- - 0 - - 0 - -3>*8")
   .scale("c5:major")
   .layer(
     x=>x.add(note(-12)),
@@ -128,11 +147,23 @@ _COUNTER: n("<- - 0 - - 0 - -3>*8")
   // .velocity(1.25)
   .room("0.5")
   .delay("0.2")
+  .gain("1".mul(stab_on))
 
-_LEAD: stack(
+const lead = arrange(
+  [48, n("-")],
+  [16, n("-")],
+  [8, note("<0 - 1 [- 0 1] 2 - - <[4 4 4] ->>*2")],
+  [8, stack(
   note("<0 - 1 [- 0 1] 2 - - <[4 4 4] ->>*2"),
   note("<2 - 4 [- 2 4] 5 - - <[7 7 7] ->>*2")
-  )
+  )]
+)
+
+LEAD:  lead
+  // stack(
+  // note("<0 - 1 [- 0 1] 2 - - <[4 4 4] ->>*2"),
+  // note("<2 - 4 [- 2 4] 5 - - <[7 7 7] ->>*2")
+  // )
   .scale("C4:Major")
   .s("gm_overdriven_guitar:3")
   .off(1/16, x=>x.add(note(12)).gain(0.3).delay("1"))
@@ -143,7 +174,8 @@ _LEAD: stack(
 
 // I WANT TO SAY THAT I MISS YOU, I WANT TO SAY THAT I
 // I WANT TO SAY THAT I NEED IT,  I WANT TO SAY I WANT IT
-_VOX: n("<- - - [- 0] 1 [- 1] 1 [0 1] 2 0 - [- <0 4>] 1 [- 1] 1 [0 <1 0>]>*4")
+const vox_on = arrange([48, "0"], [16, "1"], [16, "0"])
+VOX: n("<- - - [- 0] 1 [- 1] 1 [0 1] 2 0 - [- <0 4>] 1 [- 1] 1 [0 <1 0>]>*4")
   .scale("C4:Major")
   // .s("saw,tri")
   .s("gm_lead_3_calliope:0,supersaw")
@@ -151,10 +183,11 @@ _VOX: n("<- - - [- 0] 1 [- 1] 1 [0 1] 2 0 - [- <0 4>] 1 [- 1] 1 [0 <1 0>]>*4")
     x=>x.gain(1.6),
     x=>x.add(note(12)).room("1").delay("0.5")
   )
-  .velocity(1.5)
+  .velocity("1.5".mul(vox_on))
 
 // ADD a gm_percussive_organ part -- should be punchy rhythmic chords or melody
-_RHYTHM: n("<- - [0,1,4] [- [0,1,4]] [- [0,1,4]] [0,2,4] - [[0,2,4] [0,2,4]]>*8").scale("[C5,C4]:Major").s("gm_percussive_organ, gm_epiano2:4").room("0.3").legato(1.2)//.gain(2)
+const rhythm_on = arrange([48, "0"], [32, "1"])
+RHYTHM: n("<- - [0,1,4] [- [0,1,4]] [- [0,1,4]] [0,2,4] - [[0,2,4] [0,2,4]]>*8").scale("[C5,C4]:Major").s("gm_percussive_organ, gm_epiano2:4").room("0.3").legato(1.2).velocity(rhythm_on)//.gain(2)
 // ADD a gm_choir_aahs part -- should be high
 const pad_patt = n("<4@4 - - - <- 5 1 - - 5 0 5>>*8")
   .scale("C4:Major")
@@ -162,7 +195,7 @@ const pad_patt = n("<4@4 - - - <- 5 1 - - 5 0 5>>*8")
   .legato("2")
 
 const pad_transpose = arrange([8, "12"],[16, "0"])
-const pad_gain = arrange([8, "2"], [16, "3"])
+const pad_gain = arrange([8, "2"], [16, "3"], [8, "2"], [16, "3"], [8, "0"], [32, "0"])
 
 PAD: pad_patt.transpose(pad_transpose).gain(pad_gain)
 
@@ -172,16 +205,17 @@ PAD: pad_patt.transpose(pad_transpose).gain(pad_gain)
 await initHydra()
 
 let spiral1 = (
-  osc(20,-0.1,0).luma(0.5).kaleid(60).scale(1, 1, 1)
+  osc(20,()=>Math.cos(time/10)/100,0).luma(0.9).kaleid(60).scale(1, 1, 1)
 )
 
 let spiral2 = (
-  osc(20,()=>Math.sin(time/10)/10,0).luma(0.9).kaleid(60).scale(1, 1, 1).scrollX(0.5)
+  osc(20,()=>Math.sin(time/10)/100,0).luma(0.9).kaleid(60).scale(1, 1, 1).scrollX(0.5)
 )
 
 src(o0).blend(
-  spiral1.add(spiral2).colorama(()=>Math.sin(time/30)*5)
-).modulate(noise(3)).out(o0)
+    spiral1.add(spiral2).colorama(()=>Math.sin(time/100)*5)
+  )
+  .modulate(noise(3)).out(o0)
 
 src(o0).add(shape(4).scale(1,0.81,1.64)).invert().out(o1)
 
@@ -190,4 +224,4 @@ src(s2).scale(0.5, 0.5, 1).mask(shape(4).scale(1,0.81,1.64)).out(o2)
 
 src(o1).add(src(o2)).out(o3)
 
-render(o3)
+render(o3) // o3
